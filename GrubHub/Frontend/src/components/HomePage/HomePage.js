@@ -26,8 +26,6 @@ class HomePage extends Component {
             this.setState({searchFlag:true})
         sessionStorage.setItem("ItemSearched",this.state.itemSearched);
         }
-        
-        
     }
     render() {
         let redirectVar = null;
@@ -35,22 +33,28 @@ class HomePage extends Component {
             redirectVar = <Redirect to="/login" />
         }
         if(this.state.searchFlag==true){
+            this.setState({searchFlag:false})
+            console.log("hoempage")
             redirectVar= <Redirect to="/SearchPage" />
+            
         }
         return (
-            <div>
+            <div class="home">
                 {redirectVar}
+                
                 <div class="row">
-                    <div class="col-md-12"> <p align="center" style={{ backgroundColor: "#d9d9d9", fontSize: '50px', color: '#000000', paddingLeft: '20px', paddingRight: '20px', }}>HomePage</p></div>
+                    <div class="col-md-12"> <p align="center" style={{ backgroundColor: "white", fontSize: '50px', color: '#000000', paddingLeft: '20px', paddingRight: '20px', }}></p></div>
                 </div>
-                <div class="row" style={{ marginTop: '50px' }}>
+                <div class="row " style={{ marginTop: '50px' }}>
                     <div class="col-md-3"></div>
-                    <div class="col-md-5">
-                        <div class="col-md-2"></div>
-                        <div class="col-md-6 "><input onChange ={this.itemSearchedChangeHandler}style={{ height: '50px' }} class="col-md-12" type="text" placeholder="What are you looking for?"></input></div>
-                        <div class="col-md-4"><button class="btn btn-info btn-lg" onClick ={this.serachFood} >Find Food</button></div>
+                    <div class="col-md-6">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-7 "><input onChange ={this.itemSearchedChangeHandler}style={{ height: '50px',width:'450px',fontSize:'20px' }} type="text" placeholder="What are you looking for?"></input></div>
+                        <div class="col-md-4" style={{paddingBottom:"200px", }}><button class="btn btn-lg" style={{backgroundColor:"rgb(0, 112, 235)",color:"white"}} onClick ={this.serachFood} >Find Food</button></div>
                     </div>
-                    <div class="col-md-4"></div>
+                    <div class="col-md-3"></div>
+                    <br></br>
+                    <br></br>
                 </div>
 
             </div>

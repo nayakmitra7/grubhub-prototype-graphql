@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import cookie from 'react-cookies';
 import {Redirect} from 'react-router';
 import axios from 'axios';
-import Sidebar from '../sidebar/sidebar';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 import {DropdownButton} from 'react-bootstrap'

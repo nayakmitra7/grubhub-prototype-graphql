@@ -3,9 +3,7 @@ import React, { Component } from 'react';
 import cookie from 'react-cookies';
 import axios from 'axios';
 import { Redirect } from 'react-router';
-import ImageUploader from 'react-images-upload';
-import Axios from 'axios';
-import HomePage from '../HomePage/HomePage'
+
 
 class SearchPage extends Component {
     constructor(props) {
@@ -17,11 +15,15 @@ class SearchPage extends Component {
             itemToPrint: "",
             filterFlag: false,
             filterVal: "",
-            detailsFlag: false
+            detailsFlag: false,
+            searchFlag:false,
+            bag:localStorage.getItem(sessionStorage.getItem("username"))? JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))) :[],
+
         }
         this.showRestaurantDetails = this.showRestaurantDetails.bind(this);
 
     }
+    
     itemSearch = () => {
         if (this.state.itemSearched.length) {
             this.setState({ itemToPrint: this.state.itemSearched, filterFlag: false })
@@ -48,6 +50,7 @@ class SearchPage extends Component {
     }
     showRestaurantDetails = (e) => {
         sessionStorage.setItem("RestaurantID", e.target.id);
+        sessionStorage.setItem("RestaurantName", e.target.innerHTML);
         sessionStorage.setItem("ItemSearched","")
         this.setState({ detailsFlag: true,searchFlag:false })
 
@@ -87,7 +90,7 @@ class SearchPage extends Component {
         if (this.state.restaurantsServingItem.length) {
             this.state.restaurantsServingItem.map((restaurant) => {
                 array.push(
-                    <div class="row " style={{ marginBottom: '25px', borderStyle: "groove", paddingTop: '10px', paddingBottom: '10px' }}>
+                    <div class="row embossed-heavy " style={{ marginBottom: '0px', borderStyle: "groove", paddingTop: '20px', paddingBottom: '20px',backgroundColor:'white' }}>
                         <span class="border border-dark">
                             <div class="col-md-3"><img></img></div>
                             <div class="col-md-5">
@@ -140,20 +143,17 @@ class SearchPage extends Component {
             var set1 = new Set();
             set1.add(<li class="li" onClick={this.filterView}>None</li>)
             this.state.restaurantsServingItem.forEach((item) => {
-                set1.add(<li class="li" id={item.restaurantCuisine} onClick={this.filterView}>{item.restaurantCuisine}</li>)
+                set1.add(<div class="row" id={item.restaurantCuisine} onClick={this.filterView} style={{backgroundColor:"white"}}>{item.restaurantCuisine}</div>)
             })
             filterBy = set1;
         }
         return (
             <div>
                 {redirectVar}
-                <div class="row" style={{ backgroundColor: "#d9d9d9" }}>
-                    <div class="col-md-6"> <p align="center" style={{ backgroundColor: "#d9d9d9", fontSize: '50px', color: '#000000', paddingLeft: '20px', paddingRight: '20px', }}>Search Page</p></div>
-
-                    <div class="col-md-6" style={{ marginTop: '20px' }}>
-                        <div class="col-md-2"></div>
+                <div class="row" style={{ backgroundColor: "white" }}>
+                    <div class="col-md-6" style={{ marginTop: '20px',paddingLeft:'25px' }}>
                         <div class="col-md-6 "><input onChange={this.itemSearchedChangeHandler} style={{ height: '45px' }} class="col-md-12" type="text" placeholder="What are you looking for?"></input></div>
-                        <div class="col-md-4"><button class="btn btn-info btn-lg" onClick={this.serachFood} >Find Food</button></div>
+                        <div class="col-md-2"><button class="btn btn-info btn-lg" onClick={this.serachFood} >Find Food</button></div>
                     </div>
                 </div>
                 <div class="row">

@@ -3,7 +3,6 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
-import Sidebar from '../sidebar/sidebar';
 import App from '../../App'
 import ReactDOM from 'react-dom';
 

@@ -3,8 +3,6 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import {Redirect} from 'react-router';
-import Sidebar from '../sidebar/sidebar';
-import {Navbar, Nav, NavItem, Button} from 'react-bootstrap';
 import { slide as Menu } from 'react-burger-menu';
 import {Route} from 'react-router-dom';
 

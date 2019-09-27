@@ -4,7 +4,6 @@ import axios from 'axios';
 import { Redirect } from 'react-router';
 import ImageUploader from 'react-images-upload';
 import Axios from 'axios';
-import Sidebar from '../sidebar/sidebar';
 
 
 
