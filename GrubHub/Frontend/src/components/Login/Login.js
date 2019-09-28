@@ -16,6 +16,7 @@ class Login extends Component{
         this.usernameChangeHandler = this.usernameChangeHandler.bind(this);
         this.passwordChangeHandler = this.passwordChangeHandler.bind(this);
         this.submitLogin = this.submitLogin.bind(this);
+        this.fetchDetails=this.fetchDetails.bind(this);
     }
     componentWillMount(){
         this.setState({
@@ -32,31 +33,47 @@ class Login extends Component{
             password : e.target.value
         })
     }
+    fetchDetails = (username)=>{
+        axios.get('http://localhost:3001/Details/'+username)
+        .then(response => {
+            if(response.status === 200){
+                sessionStorage.setItem("Address",response.data.buyerAddress);
+                sessionStorage.setItem("FirstName",response.data.buyerFirstName);
+                sessionStorage.setItem("BuyerId",response.data.buyerID)
+                console.log(sessionStorage.getItem("BuyerId"));
+                return Promise.resolve();
+            }
+          
+        });
+    }
     submitLogin = (e) => {
         var headers = new Headers();
+        
         e.preventDefault();
         const data = {
             username : this.state.username,
             password : this.state.password
         }
         axios.defaults.withCredentials = true;
-        axios.post('http://localhost:3001/login',data)
+        this.fetchDetails(this.state.username);
+       
+            axios.post('http://localhost:3001/login',data)
             .then(response => {
-                console.log("Status Code : ",response.status);
                 if(response.status === 200){
                     sessionStorage.setItem("username",this.state.username);
+                    //this.fetchDetails();
                     this.setState({
                         authFlag : true
                     })
                 }
                 else if(response.status === 201){
-                    console.log(response.data);
                     this.setState({
                         authFlag : false,
                         errorMessage : response.data
                     })
                 }
             });
+        
     }
 
     render(){

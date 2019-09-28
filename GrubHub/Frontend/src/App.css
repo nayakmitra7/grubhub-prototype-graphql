@@ -12,7 +12,7 @@
 .main-div {
   background: #ffffff none repeat scroll 0 0;
   border-radius: 2px;
-  margin: 200px auto 30px;
+  margin: 150px auto 30px;
   max-width: 30%;
   padding: 50px 10px 70px 10px;
   border: 2px solid black;
@@ -99,10 +99,10 @@ margin: 90px ;
   background-image: url('./grub.jpg');
   background-repeat: no-repeat;
   background-position: 350px 00px;
-  margin-top: 50px;
+  margin-top: 0px;
 }
 .backgroundImgRest{
-  margin-top: 50px;
+  margin-top: 20px;
   background-image: url('./restaurant.png');
   background-repeat: no-repeat;
   background-position: 500px 00px;
@@ -248,3 +248,9 @@ body{
 }
 input.qtyplus { width:25px; height:25px;}
 input.qtyminus { width:25px; height:25px;}
+
+
+  
+  
+  
+  

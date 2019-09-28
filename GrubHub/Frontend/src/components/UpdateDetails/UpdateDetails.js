@@ -19,7 +19,8 @@ class UpdateDetails extends Component{
             authFlag : true,
             readOnly:true,
             ID:"",
-            errorFlag:"No update"
+            errorFlag:"No update",
+            address:""
         }
         this.firstNameChangeHandler = this.firstNameChangeHandler.bind(this);
         this.lastNameChangeHandler = this.lastNameChangeHandler.bind(this);
@@ -30,11 +31,10 @@ class UpdateDetails extends Component{
    
       
     componentDidMount(){
-        var data = {username : sessionStorage.getItem("username")}
-        Axios.post('http://localhost:3001/Details',data)
+        axios.get('http://localhost:3001/Details/'+sessionStorage.getItem("username"))
         .then(response => {
             
-            console.log("Status Code : ",response.status);
+            console.log("Status Code : ",response);
             if(response.status === 200){
                 this.setState({
                     firstName:response.data.buyerFirstName,
@@ -42,7 +42,8 @@ class UpdateDetails extends Component{
                     email:response.data.buyerEmail,
                     phone:response.data.buyerPhone,
                     image:response.data.buyerImage,
-                    ID:response.data.buyerID
+                    ID:response.data.buyerID,
+                    address:response.data.buyerAddress
                 })
             }
             
@@ -80,18 +81,25 @@ class UpdateDetails extends Component{
             readOnly:false
                 })
     } 
+    addressChangeHandler=(e)=>{
+        this.setState({
+            address : e.target.value
+        })
+    }
 
     updateHandler = (e) =>{
     e.preventDefault();
-    const data = { firstName: this.state.firstName, lastName : this.state.lastName , email :this.state.email, phone:this.state.phone,ID:this.state.ID};
+    const data = { firstName: this.state.firstName, lastName : this.state.lastName , email :this.state.email, phone:this.state.phone,ID:this.state.ID,address:this.state.address};
     axios.defaults.withCredentials = true;
 
     if(this.state.readOnly==false){
-        Axios.post('http://localhost:3001/updateBuyer',data)
+        axios.post('http://localhost:3001/updateBuyer',data)
         .then(response => {
             console.log("Status Code : ",response.status);
             if(response.status === 200){
-                sessionStorage.setItem("username",this.state.username);
+                var bag = localStorage.getItem(sessionStorage.getItem("username")) ? JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))) : []
+                sessionStorage.setItem("username",this.state.email);
+                localStorage.setItem(sessionStorage.getItem("username"), JSON.stringify(bag));
                 this.setState({
                     errorFlag : "Success"
                 })
@@ -157,6 +165,11 @@ class UpdateDetails extends Component{
             <tr>Phone</tr>
             <tr>
             <input onChange = {this.phoneChangeHandler} value={this.state.phone} type="text" class="form-control email" name="phone" readOnly={this.state.readOnly}/>
+            </tr>
+            <br></br>
+            <tr>Address</tr>
+            <tr>
+            <input onChange = {this.addressChangeHandler} value={this.state.address} type="text" class="form-control email" name="address" readOnly={this.state.readOnly}/>
             </tr>
             </div>
             <br></br><br></br>

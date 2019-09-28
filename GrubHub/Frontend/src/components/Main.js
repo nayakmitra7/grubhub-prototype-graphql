@@ -9,11 +9,12 @@ import LoginOwner from './LoginOwner/LoginOwner';
 import SignUpOwner from './SignUpOwner/SignUpOwner';
 import MenuOwner from './MenuOwner/MenuOwner';
 import HomeOwner from './HomeOwner/HomeOwner';
-import Delete from './Delete/Delete';
+import Delete from './UpcomingOrder/UpcomingOrder';
 import HomePage from './HomePage/HomePage'
 import SearchPage from './SearchPage/SearchPage'
 import DetailsPage from './DetailsPage/DetailsPage'
-
+import ReviewPage from './ReviewPage/ReviewPage'
+import UpcomingOrder from './UpcomingOrder/UpcomingOrder'
 class Main extends Component {
     render(){
         return(
@@ -32,7 +33,10 @@ class Main extends Component {
                 <Route path="/HomePage" component={HomePage}/>
                 <Route path="/SearchPage" component={SearchPage}/>
                 <Route path="/DetailsPage" component={DetailsPage}/>
+                <Route path="/ReviewPage" component={ReviewPage}/>
+                <Route path="/UpcomingOrder" component={UpcomingOrder}/>
 
+                
             </div>
         )
     }

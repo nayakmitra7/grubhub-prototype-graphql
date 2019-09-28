@@ -22,7 +22,7 @@ app.use(session({
     saveUninitialized: false, // Force to save uninitialized session to db. A session is uninitialized when it is new but not modified.
     cookie: {
         maxAge: 24 * 60 * 60 * 1000
-      }
+    }
     // duration: 86400000,    // Overall duration of Session : 30 minutes : 1800 seconds
     // activeDuration: 86400000
 }));
@@ -148,7 +148,8 @@ app.post('/signup',
     [check("firstName", "First Name is needed.").not().isEmpty(),
     check("lastName", "Last Name is needed.").not().isEmpty(),
     check("password", "Password length needs to be 8 or more.").isLength({ min: 8 }),
-    check("email", "Wrong E-Mail format.").isEmail()
+    check("email", "Wrong E-Mail format.").isEmail(),
+    check("address", "Address is needed.").not().isEmpty()
     ], function (req, res) {
         var message = validationResult(req).errors;
         if (message.length > 0) {
@@ -159,7 +160,7 @@ app.post('/signup',
         } else {
             bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
                 if (!err) {
-                    var query = 'INSERT INTO buyer (buyerFirstName, buyerLastName, buyerPassword,buyerEmail) VALUES ("' + req.body.firstName + '","' + req.body.lastName + '","' + hash + '","' + req.body.email + '");'
+                    var query = 'INSERT INTO buyer (buyerFirstName, buyerLastName, buyerPassword,buyerEmail,buyerAddress) VALUES ("' + req.body.firstName + '","' + req.body.lastName + '","' + hash + '","' + req.body.email + '","' + req.body.address + '");'
                     pool.query(query, function (err, result, fields) {
                         if (err) {
                             res.writeHead(201, {
@@ -236,7 +237,8 @@ app.post('/SignUpOwner',
     check("email", "Wrong E-Mail format.").isEmail(),
     check("password", "Password length needs to be 8 or more.").isLength({ min: 8 }),
     check("restaurant", "Restaurant Name is needed.").not().isEmpty(),
-    check("zipcode", "Zipcode is needed.").not().isEmpty()
+    check("zipcode", "Zipcode is needed.").not().isEmpty(),
+
     ], function (req, res, next) {
         var message = validationResult(req).errors;
         if (message.length > 0) {
@@ -261,8 +263,8 @@ app.post('/SignUpOwner',
             })
         }
     });
-app.post('/Details', function (req, res, next) {
-    var query = 'Select buyerFirstName,buyerLastName,buyerEmail,buyerPhone,buyerImage,buyerID from buyer where buyerEmail="' + req.body.username + '"'
+app.get('/Details/(:data)', function (req, res, next) {
+    var query = 'Select buyerFirstName,buyerLastName,buyerEmail,buyerPhone,buyerImage,buyerID,buyerAddress from buyer where buyerEmail="' + req.params.data + '"'
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {
@@ -318,9 +320,10 @@ app.get('/DetailsRestaurant/(:data)', function (req, res, next) {
 app.post('/updateBuyer', [check("firstName", "First Name is needed.").not().isEmpty(),
 check("lastName", "Last Name is needed.").not().isEmpty(),
 check("phone", "Invalid phone number.").isLength({ min: 10 }),
-check("email", "Wrong E-Mail format.").isEmail()],
+check("email", "Wrong E-Mail format.").isEmail(), check("address", "Address is needed.").not().isEmpty()],
     function (req, res, next) {
-        var query = 'update buyer set buyerFirstName="' + req.body.firstName + '",buyerLastName="' + req.body.lastName + '",buyerEmail ="' + req.body.email + '",buyerPhone="' + req.body.phone + '"  where buyerID="' + req.body.ID + '"'
+        var query = 'update buyer set buyerFirstName="' + req.body.firstName + '",buyerLastName="' + req.body.lastName + '",buyerEmail ="' + req.body.email + '",buyerPhone="' + req.body.phone + '",buyerAddress="' + req.body.address + '"  where buyerID="' + req.body.ID + '"'
+
         var message = validationResult(req).errors;
         if (message.length > 0) {
             res.writeHead(201, {
@@ -463,7 +466,7 @@ app.post('/section',
     })
 app.get('/section/(:data)', function (req, res, next) {
     var query = 'Select menuSectionId,menuSectionName,menuSectionDesc ,count(itemName) as count from sys.menuSection left outer join sys.menuItems  on   menuSection.menuSectionId =menuItems.SectionId where menuSection.restaurantId=' + req.params.data + ' group by menuSectionId order by menuSectionName Asc';
-var message=[];
+    var message = [];
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {
@@ -525,52 +528,49 @@ app.get('/items/(:data)', function (req, res, next) {
             res.writeHead(200, {
                 'Content-Type': 'text/plain'
             });
-            console.log(JSON.stringify(JSON.parse(JSON.stringify(result))))
             res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
         }
     })
 })
-app.put('/items',[check("itemName", "Item Name is needed.").not().isEmpty(),
+app.put('/items', [check("itemName", "Item Name is needed.").not().isEmpty(),
 check("itemPrice", "Item Price is needed.").not().isEmpty(),
 check("itemSection", "Item Section is needed.").not().equals("0")],
- function (req, res, next) {
-    var query = 'update menuItems set ItemName="' + req.body.itemName + '",SectionId="' + req.body.itemSection + '",ItemPrice ="' + req.body.itemPrice + '",ItemDesc="' + req.body.itemDesc + '"  where ItemId="' + req.body.itemId + '"'
-    var message = validationResult(req).errors;
-    if (message.length > 0) {
-        res.writeHead(201, {
-            'Content-Type': 'text/plain'
-        });
-        res.end(JSON.stringify(message));
-    } else {
-        pool.query(query, function (err, result, fields) {
-            if (err) {
-                res.writeHead(201, {
-                    'Content-Type': 'text/plain'
-                });
-                errors = { msg: "Something went wrong" }
-                message.push(errors);
-                res.end(JSON.stringify(message));
-            } else {
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-                res.end("Success");
-            }
+    function (req, res, next) {
+        var query = 'update menuItems set ItemName="' + req.body.itemName + '",SectionId="' + req.body.itemSection + '",ItemPrice ="' + req.body.itemPrice + '",ItemDesc="' + req.body.itemDesc + '"  where ItemId="' + req.body.itemId + '"'
+        var message = validationResult(req).errors;
+        if (message.length > 0) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(message));
+        } else {
+            pool.query(query, function (err, result, fields) {
+                if (err) {
+                    res.writeHead(201, {
+                        'Content-Type': 'text/plain'
+                    });
+                    errors = { msg: "Something went wrong" }
+                    message.push(errors);
+                    res.end(JSON.stringify(message));
+                } else {
+                    res.writeHead(200, {
+                        'Content-Type': 'text/plain'
+                    });
+                    res.end("Success");
+                }
 
-        })
-    }
-})
+            })
+        }
+    })
 
 app.delete('/items/(:data)', function (req, res, next) {
-    var message=[];
-    console.log(req.params.data)
-    var query = 'Delete from menuItems where ItemId =' + req.params.data 
+    var message = [];
+    var query = 'Delete from menuItems where ItemId =' + req.params.data
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {
                 'Content-Type': 'text/plain'
             });
-            console.log(err)
             errors = { msg: "Something went wrong" }
             message.push(errors);
             res.end(JSON.stringify(message));
@@ -578,44 +578,43 @@ app.delete('/items/(:data)', function (req, res, next) {
             res.writeHead(200, {
                 'Content-Type': 'text/plain'
             });
-            console.log(JSON.stringify(JSON.parse(JSON.stringify(result))))
             res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
         }
     })
 })
 
-app.put('/sections',[check("menuSectionName", "Section Name is needed.").not().isEmpty()],
- function (req, res, next) {
-    var query = 'update menuSection set menuSectionName="' + req.body.menuSectionName + '",menuSectionDesc="' + req.body.menuSectionDesc +'"  where menuSectionId="' + req.body.menuSectionId + '"'
-    var message = validationResult(req).errors;
-    if (message.length > 0) {
-        res.writeHead(201, {
-            'Content-Type': 'text/plain'
-        });
-        res.end(JSON.stringify(message));
-    } else {
-        pool.query(query, function (err, result, fields) {
-            if (err) {
-                res.writeHead(201, {
-                    'Content-Type': 'text/plain'
-                });
-                errors = { msg: "Something went wrong" }
-                message.push(errors);
-                res.end(JSON.stringify(message));
-            } else {
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-                res.end("Success");
-            }
+app.put('/sections', [check("menuSectionName", "Section Name is needed.").not().isEmpty()],
+    function (req, res, next) {
+        var query = 'update menuSection set menuSectionName="' + req.body.menuSectionName + '",menuSectionDesc="' + req.body.menuSectionDesc + '"  where menuSectionId="' + req.body.menuSectionId + '"'
+        var message = validationResult(req).errors;
+        if (message.length > 0) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(message));
+        } else {
+            pool.query(query, function (err, result, fields) {
+                if (err) {
+                    res.writeHead(201, {
+                        'Content-Type': 'text/plain'
+                    });
+                    errors = { msg: "Something went wrong" }
+                    message.push(errors);
+                    res.end(JSON.stringify(message));
+                } else {
+                    res.writeHead(200, {
+                        'Content-Type': 'text/plain'
+                    });
+                    res.end("Success");
+                }
 
-        })
-    }
-})
+            })
+        }
+    })
 
-var promiseDelete =(req)=>{
-    return new Promise((resolve,reject)=>{
-        var query = 'Delete from menuItems where SectionId =' + req.params.data 
+var promiseDelete = (req) => {
+    return new Promise((resolve, reject) => {
+        var query = 'Delete from menuItems where SectionId =' + req.params.data
         pool.query(query, function (err, result, fields) {
             if (err) {
                 reject()
@@ -625,14 +624,12 @@ var promiseDelete =(req)=>{
         })
 
     })
-    
+
 }
 app.delete('/sections/(:data)', function (req, res, next) {
-    var message=[];
-    console.log(req.params.data)
-    
-    var query2 = 'Delete from menuSection where menuSectionId =' + req.params.data 
-    promiseDelete(req).then(()=>{
+    var message = [];
+    var query2 = 'Delete from menuSection where menuSectionId =' + req.params.data
+    promiseDelete(req).then(() => {
         pool.query(query2, function (err, result, fields) {
             if (err) {
                 res.writeHead(201, {
@@ -645,16 +642,14 @@ app.delete('/sections/(:data)', function (req, res, next) {
                 res.writeHead(200, {
                     'Content-Type': 'text/plain'
                 });
-                console.log(JSON.stringify(JSON.parse(JSON.stringify(result))))
                 res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
             }
         })
     })
 })
 app.get('/RestaurantSearched/(:data)', function (req, res, next) {
-    var message=[];
-    console.log(req.params.data)
-    var query = 'select restaurantId,restaurantName,restaurantCuisine,restaurantAddress from restaurant where restaurantId in (SELECT restaurantId FROM menuItems where ItemName like "%'+req.params.data+'%")'
+    var message = [];
+    var query = 'select restaurantId,restaurantName,restaurantCuisine,restaurantAddress from restaurant where restaurantId in (SELECT restaurantId FROM menuItems where ItemName like "%' + req.params.data + '%")'
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {
@@ -667,7 +662,53 @@ app.get('/RestaurantSearched/(:data)', function (req, res, next) {
             res.writeHead(200, {
                 'Content-Type': 'text/plain'
             });
-            console.log(JSON.stringify(JSON.parse(JSON.stringify(result))))
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+        }
+    })
+})
+fetchOrder = (req) => {
+    return new Promise((resolve, reject) => {
+        
+    })
+}
+app.post('/Order', function (req, res, next) {
+    var message = [];
+     var query="Insert INTO sys.order (restaurantId,buyerId,buyerAddress,orderStatus,orderDetails,orderDate) values ('"+req.body.restaurantId+"','"+req.body.buyerID+"','"+req.body.buyerAddress+"','"+"New"+"','"+req.body.bag+"','"+req.body.date+"')"
+        pool.query(query, function (err, result, fields) {
+            if (err) {
+                res.writeHead(201, {
+                    'Content-Type': 'text/plain'
+                });
+                errors = { msg: "Something went wrong" }
+                message.push(errors);
+                res.end(JSON.stringify(message));
+            } else {
+                res.writeHead(200, {
+                    'Content-Type': 'text/plain'
+                });
+                errors = { msg: "Order Placed" }
+                message.push(errors);
+                res.end(JSON.stringify(message));
+            }
+        })
+
+
+})
+app.get('/Orders/(:data)', function (req, res, next) {
+    var message = [];
+    var query = 'Select restaurantName,buyerAddress,orderStatus,orderDetails,orderDate,orderId from sys.order,sys.restaurant where order.restaurantId=restaurant.restaurantId and buyerId=' + req.params.data 
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
             res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
         }
     })

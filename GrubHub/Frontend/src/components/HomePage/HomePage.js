@@ -18,6 +18,7 @@ class HomePage extends Component {
         this.itemSearchedChangeHandler = this.itemSearchedChangeHandler.bind(this);
        
     }
+   
     itemSearchedChangeHandler=(e)=>{
         this.setState({itemSearched:e.target.value,searchFlag:false})
     }
@@ -34,7 +35,6 @@ class HomePage extends Component {
         }
         if(this.state.searchFlag==true){
             this.setState({searchFlag:false})
-            console.log("hoempage")
             redirectVar= <Redirect to="/SearchPage" />
             
         }

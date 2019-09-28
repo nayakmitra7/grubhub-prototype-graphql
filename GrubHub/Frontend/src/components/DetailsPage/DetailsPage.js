@@ -24,12 +24,12 @@ class DetailsPage extends Component {
             itemPrice: "",
             itemSection: "",
             itemId: "",
-            count: JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))).length,
+            count: JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))) ? JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))).length : 0,
             itemCount: 1,
             itemCostTotal: 0,
             bag: localStorage.getItem(sessionStorage.getItem("username")) ? JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))) : [],
             itemsPresent: [],
-            checkoutFlag:false
+            checkoutFlag: false
         }
         this.addItemModal = this.addItemModal.bind(this);
         this.incrementCount = this.incrementCount.bind(this);
@@ -38,8 +38,23 @@ class DetailsPage extends Component {
         this.itemSearchedChangeHandler = this.itemSearchedChangeHandler.bind(this);
 
     }
-    CheckOut =()=>{
-        this.setState({checkoutFlag:true})
+    CheckOut = () => {
+        this.setState({ checkoutFlag: true })
+        var today=new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var time =today.getHours() + ":" + today.getMinutes();
+        var CurrentDateTime = date+' '+time
+        var data ={restaurantId:this.state.restaurantId,buyerID:sessionStorage.getItem("BuyerId"),buyerAddress:sessionStorage.getItem("Address"),orderStatus:"New",bag:localStorage.getItem(sessionStorage.getItem("username")),date:CurrentDateTime}
+        axios.post('http://localhost:3001/Order',data)
+        .then(response => {
+            if(response.status === 200){
+              this.setState({bag:[]})
+              localStorage.removeItem(sessionStorage.getItem("username"))
+            }
+            else if(response.status === 201){
+                
+            }
+        });
     }
     openShoppingCart = () => {
         document.getElementById("shoppingCart").style.display = "block";
@@ -48,9 +63,9 @@ class DetailsPage extends Component {
         document.getElementById("shoppingCart").style.display = "none";
 
     }
-    cancelBagAdd =()=>{
+    cancelBagAdd = () => {
         this.warningMessageClose();
-        document.getElementById("modalAddItem").style.display="none"
+        document.getElementById("modalAddItem").style.display = "none"
     }
     serachFood = () => {
         if (this.state.itemSearched.length) {
@@ -61,43 +76,40 @@ class DetailsPage extends Component {
     itemSearchedChangeHandler = (e) => {
         this.setState({ itemSearched: e.target.value })
     }
-    emptyBag1 =()=>{
-     return new Promise((resolve,reject)=>{
-        document.getElementById("warningMessage").style.display="none";
-        this.setState({bag:[],count:0});
-        localStorage.setItem(sessionStorage.getItem("username"), JSON.stringify([]));
-        resolve();
-     })   
+    emptyBag1 = () => {
+        return new Promise((resolve, reject) => {
+            document.getElementById("warningMessage").style.display = "none";
+            this.setState({ bag: [], count: 0 });
+            localStorage.setItem(sessionStorage.getItem("username"), JSON.stringify([]));
+            resolve();
+        })
     }
-    emptyBag =()=>{
-        this.emptyBag1().then(()=>{
+    emptyBag = () => {
+        this.emptyBag1().then(() => {
             this.addToBag();
         })
     }
     checkIfSameRetaurant = (e) => {
-        if(this.state.bag.length){
+        if (this.state.bag.length) {
             var item = this.state.bag[0];
-                if (item.restaurantId == this.state.restaurantId) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-        }else{
+            if (item.restaurantId == this.state.restaurantId) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
             return 1;
         }
-        
-        
-
     }
     addToBag = () => {
-        var item = { itemId: this.state.itemId, itemName: this.state.itemName, itemCostTotal: this.state.itemCostTotal, itemCount: this.state.itemCount, restaurantId: this.state.restaurantId }
+        var item = { itemId: this.state.itemId, itemName: this.state.itemName, itemCostTotal: parseFloat(this.state.itemCostTotal), itemCount: this.state.itemCount, restaurantId: this.state.restaurantId }
         if (this.checkIfSameRetaurant()) {
             var itemPresent = false;
             this.state.bag.forEach((itemInBag) => {
                 if (itemInBag.itemId == this.state.itemId) {
                     itemPresent = true;
                     itemInBag.itemCount += this.state.itemCount;
-                    itemInBag.itemCostTotal += this.state.itemCostTotal;
+                    itemInBag.itemCostTotal = parseFloat(itemInBag.itemCostTotal) + parseFloat(this.state.itemCostTotal);
                 }
             })
             this.setState({ messageFlag: true })
@@ -113,11 +125,11 @@ class DetailsPage extends Component {
             }, 1000);
             localStorage.setItem(sessionStorage.getItem("username"), JSON.stringify(this.state.bag));
         } else {
-            document.getElementById("warningMessage").style.display="block"
+            document.getElementById("warningMessage").style.display = "block"
         }
     }
-    warningMessageClose=()=>{
-        document.getElementById("warningMessage").style.display="none";
+    warningMessageClose = () => {
+        document.getElementById("warningMessage").style.display = "none";
 
     }
     decrementCount = (e) => {
@@ -125,7 +137,7 @@ class DetailsPage extends Component {
             var quantity = this.state.itemCount - 1;
             var cost = this.state.itemPrice;
             var costTotal = quantity * cost;
-            this.setState({ itemCount: quantity, itemCostTotal: costTotal })
+            this.setState({ itemCount: quantity, itemCostTotal: parseFloat(costTotal).toFixed(2) })
 
         }
     }
@@ -133,7 +145,7 @@ class DetailsPage extends Component {
         var quantity = this.state.itemCount + 1;
         var cost = this.state.itemPrice;
         var costTotal = quantity * cost;
-        this.setState({ itemCount: quantity, itemCostTotal: costTotal })
+        this.setState({ itemCount: quantity, itemCostTotal: parseFloat(costTotal).toFixed(2) })
 
     }
 
@@ -180,17 +192,19 @@ class DetailsPage extends Component {
             }
         })
         var quantity = this.state.itemCount;
-        var cost = item[0].ItemPrice;
+        var cost = parseFloat(item[0].ItemPrice);
+        var itemTotal = quantity * cost;
         this.setState({
             itemName: item[0].ItemName,
             itemDesc: item[0].ItemDesc,
             itemPrice: item[0].ItemPrice,
             itemCount: 1,
-            itemCostTotal: quantity * cost
+            itemCostTotal: parseFloat(itemTotal)
         })
     }
     modalCloseSection = () => {
         document.getElementById("modalAddItem").style.display = "none"
+        this.setState({ itemCount: 1 })
     }
     deleteItem = (e) => {
         var val = this.state.bag.filter((bag) => {
@@ -217,33 +231,36 @@ class DetailsPage extends Component {
         var bagDispay = ""
         var bagButtonDisplay = "";
         var array = [];
-        var subTotal=0;
+        var subTotal = parseFloat(0);
         if (this.state.bag.length) {
-            array.push(<div class="row">
-                <div className="col-md-3" style={{ fontSize: "18px" }}><p>Quantity</p></div>
-                <div className="col-md-3" style={{ fontSize: "18px" }}><p>Item Name</p></div>
+            array.push(<div class="row"><div class="col-md-12" style={{ textAlign: 'center', fontSize: '25px', marginBottom: '20px' }}>{this.state.restaurantName}</div> </div>)
+            array.push(<div class="row" style={{ textAlign: 'center' }}>
+                <div className="col-md-2" style={{ fontSize: "18px" }}><p>Quantity</p></div>
+                <div className="col-md-4" style={{ fontSize: "18px" }}><p>Item Name</p></div>
                 <div className="col-md-3"></div>
                 <div className="col-md-3" style={{ fontSize: "18px" }}><p>Cost</p></div>
             </div>)
+
             this.state.bag.forEach((bag) => {
-                subTotal+=bag.itemCostTotal;
-                array.push(<div class="row">
-                    <div className="col-md-3"><p>{bag.itemCount}</p></div>
-                    <div className="col-md-3"><p>{bag.itemName}</p></div>
+                subTotal += parseFloat(bag.itemCostTotal);
+                array.push(<div class="row" style={{ textAlign: 'center' }}>
+                    <div className="col-md-2"><p>{bag.itemCount}</p></div>
+                    <div className="col-md-4"><p>{bag.itemName}</p></div>
                     <div className="col-md-3"><span id={bag.itemId} class="glyphicon glyphicon-trash" onClick={this.deleteItem}></span></div>
                     <div className="col-md-3"><p>${bag.itemCostTotal}</p></div>
                 </div>)
 
             })
-            array.push(<hr style={{borderBottom: "1px solid #fff"}}></hr>)
+            subTotal = parseFloat(subTotal).toFixed(2);
+            array.push(<hr style={{ borderBottom: "1px solid #fff" }}></hr>)
             array.push(<div class="row">
                 <div class="col-md-7"></div>
-                <div class="col-md-3" style={{fontSize:'18px'}}>Sub Total : </div>
-                <div class="col-md-1" style={{fontSize:'18px'}}>${subTotal}</div>
+                <div class="col-md-3" style={{ fontSize: '18px' }}>Sub Total : </div>
+                <div class="col-md-1" style={{ fontSize: '18px' }}>${subTotal}</div>
                 <div class="col-md-1"></div>
             </div>)
             bagDispay = array;
-            bagButtonDisplay = (<div><input type="button" class="btn btn-success" value="Place Order" onClick={this.CheckOut}/></div>)
+            bagButtonDisplay = (<div><input type="button" class="btn btn-success" value="Place Order" onClick={this.CheckOut} /></div>)
         } else {
             bagDispay = (<div class=" emptyBag" style={{ paddingTop: '250px', paddingBottom: '250px' }}></div>)
             bagButtonDisplay = ""
@@ -252,7 +269,7 @@ class DetailsPage extends Component {
             console.log(cookie)
             redirectVar = <Redirect to="/login" />
         }
-        if(this.state.checkoutFlag==true){
+        if (this.state.checkoutFlag == true) {
             redirectVar = <Redirect to="/ReviewPage" />
         }
         if (this.state.searchFlag == true) {
@@ -267,11 +284,11 @@ class DetailsPage extends Component {
         }
         var array = [];
         if (this.state.sectionsPresent.length) {
-            array.push(<div class="row" style={{ fontSize: "30px", fontWeight: "900"  }}>
+            array.push(<div class="row" style={{ fontSize: "30px", fontWeight: "900" }}>
                 <div class="col-md-4"></div>
                 <div class="col-md-4"> {this.state.restaurantName}</div>
                 <div class="col-md-4"></div>
-           
+
             </div>)
             this.state.sectionsPresent.map((section) => {
                 var flag = 0;
@@ -286,7 +303,7 @@ class DetailsPage extends Component {
                     if (item.SectionId == section.menuSectionId) {
                         flag = 1;
                         array.push(
-                            <div class="row embossed-heavy" style={{ marginBottom: '15px', borderStyle: "groove", paddingTop: '5px', paddingBottom: '5px', marginRight: '10px',backgroundColor:'white' }}>
+                            <div class="row embossed-heavy" style={{ marginBottom: '15px', borderStyle: "groove", paddingTop: '5px', paddingBottom: '5px', marginRight: '10px', backgroundColor: 'white' }}>
                                 <span class="border border-dark" style={{ marginLeft: '10px' }}>
 
                                     <div class="col-md-5">
@@ -455,16 +472,16 @@ class DetailsPage extends Component {
                             </div>
 
                             <div class="modal-body" style={{ fontWeight: "900" }}>
-                                 Adding this will delete all other items in the bag. Do you want to proceed?
+                                Adding this will delete all other items in the bag. Do you want to proceed?
                             </div>
 
                             <div class="modal-footer">
 
                                 <div class="row">
-                                <div class="col-md-3"></div>
-                                <div class="col-md-3"><button class="btn btn-success btn-lg"  onClick={this.emptyBag}>Yes,Please</button></div>
-                                <div class="col-md-3"><button class="btn btn-danger btn-lg" style={{ width:"150px" }} onClick={this.cancelBagAdd}>No, Thanks!</button></div>
-                                <div class="col-md-3"></div>
+                                    <div class="col-md-3"></div>
+                                    <div class="col-md-3"><button class="btn btn-success btn-lg" onClick={this.emptyBag}>Yes,Please</button></div>
+                                    <div class="col-md-3"><button class="btn btn-danger btn-lg" style={{ width: "150px" }} onClick={this.cancelBagAdd}>No, Thanks!</button></div>
+                                    <div class="col-md-3"></div>
                                 </div>
 
 

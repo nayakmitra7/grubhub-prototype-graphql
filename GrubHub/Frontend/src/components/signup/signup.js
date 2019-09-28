@@ -1,135 +1,145 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
-import {Redirect} from 'react-router';
+import { Redirect } from 'react-router';
 
 class signup extends Component {
-    constructor(){
+    constructor() {
         super();
-        this.state = {  
-            firstName : "",
-            lastName : "",
-            email : "",
-            password : "",
-            errorMessage :[],
-            passwordError :"",
-            authFlag:false
+        this.state = {
+            firstName: "",
+            lastName: "",
+            email: "",
+            password: "",
+            errorMessage: [],
+            passwordError: "",
+            authFlag: false,
+            address: ""
         }
         this.firstNameChangeHandler = this.firstNameChangeHandler.bind(this);
         this.lastNameChangeHandler = this.lastNameChangeHandler.bind(this);
         this.emailChangeHandler = this.emailChangeHandler.bind(this);
         this.passwordChangeHandler = this.passwordChangeHandler.bind(this);
         this.signupHandler = this.signupHandler.bind(this);
-    }  
-    firstNameChangeHandler =(e) =>{
-        this.setState({
-            firstName : e.target.value
-        });
-
+        this.addressChangeHandler = this.addressChangeHandler.bind(this);
     }
-    lastNameChangeHandler =(e) =>{
+    firstNameChangeHandler = (e) => {
         this.setState({
-            lastName : e.target.value
+            firstName: e.target.value
         });
-
-    }  
-    emailChangeHandler =(e) =>{
+    }
+    lastNameChangeHandler = (e) => {
         this.setState({
-            email : e.target.value
+            lastName: e.target.value
         });
-
-    }  
-    passwordChangeHandler =(e) =>{
+    }
+    emailChangeHandler = (e) => {
         this.setState({
-            password : e.target.value
+            email: e.target.value
         });
-       
-
-    }  
-    signupHandler =(e) =>{
+    }
+    passwordChangeHandler = (e) => {
+        this.setState({
+            password: e.target.value
+        });
+    }
+    addressChangeHandler = (e) => {
+        this.setState({
+            address: e.target.value
+        });
+    }
+    signupHandler = (e) => {
         e.preventDefault();
         axios.defaults.withCredentials = true;
 
-        var data ={firstName:this.state.firstName, lastName:this.state.lastName, password:this.state.password, email:this.state.email}
-       axios.post("http://localhost:3001/signup",data)
-       .then((response)=>{
-           if(response.status===200){
-               this.setState({
-                authFlag:true,
-                errorMessage:[]
-               })
-               
-           }else if(response.status===201) {
-               this.setState({
-                   errorMessage: response.data,
-                   authFlag:false
-               })
-           }
+        var data = { firstName: this.state.firstName, lastName: this.state.lastName, password: this.state.password, email: this.state.email, address: this.state.address }
+        axios.post("http://localhost:3001/signup", data)
+            .then((response) => {
+                sessionStorage.setItem("username",this.state.email)
+                if (response.status === 200) {
+                    this.setState({
+                        authFlag: true,
+                        errorMessage: []
+                    })
 
-       })
+                } else if (response.status === 201) {
+                    this.setState({
+                        errorMessage: response.data,
+                        authFlag: false
+                    })
+                }
+
+            })
 
     }
-    render(){
+    render() {
 
-        var redirectVar="";
-        if(cookie.load('cookie')){
-           redirectVar = <Redirect to= "/UpdateDetails"/>
-       }
+        var redirectVar = "";
+        if (cookie.load('cookie')) {
+            redirectVar = <Redirect to="/UpdateDetails" />
+        }
         let displayMessage = null;
-        if(this.state.authFlag==false){
-            displayMessage = ( this.state.errorMessage.map( (error) =>{
-                return (<ul class="li alert-danger">{error.msg}</ul>)
+        if (this.state.authFlag == false) {
+            displayMessage = (this.state.errorMessage.map((error) => {
+                return (<div class="li alert-danger">{error.msg}</div>)
             }))
         }
-        return(
+        return (
             <div>
                 {redirectVar}
-                {displayMessage} 
-                <div class = "backgroundImg">
-            <div class="container">            
-                <div class="login-form">
-                    <div class="main-div">
-                        <div class="panel">
-                            <h2 class="heading"> Create your account</h2>
-                        </div>
-                        <table>
-                            <div class="form-group">
-                            <tr>
-                            <td class="">First Name</td>
-                            <td class="">Last Name</td>
-                            </tr>
-                            <tr>
-                            <td class="signup"><input onChange = {this.firstNameChangeHandler} type="text" class="form-control" name="firstName" /></td>
-                            <td class="signup"><input onChange = {this.lastNameChangeHandler} type="text" class="form-control" name="lastName" /></td>
-                            </tr>
-                            <br></br>
-                            <tr>
-                                Email
-                            </tr>
-                            <tr>
-                            <input onChange = {this.emailChangeHandler} type="text" class="form-control email" name="email" />
-                            </tr>
-                            <br></br>
-                            <tr>
-                                Password (8 characters minimum)
-                            </tr>
-                            <tr>
-                            <input onChange = {this.passwordChangeHandler} type="password" class="form-control email" name="password" />
-                            </tr>
-                            </div>
-                            <br></br>
-                            <button onClick = {this.signupHandler} class="btn btn-danger">Sign Up</button>                
-                            <br></br><br></br><br></br><br></br>
-                            Have an account?  
-                            <a href="/login" class="">     Log In</a>
-                            </table>
+                {displayMessage}
+                <div class="backgroundImg">
+                    <div class="container">
+                        <div class="login-form">
+                            <div class="main-div">
+                                <div class="panel">
+                                    <h2 class="heading"> Create your account</h2>
+                                </div>
+                                <div class="">
+                                    <div class="row">
+                                        <div class="col-md-6">First Name</div>
+                                        <div class="col-md-6">Last Name</div>
+                                    </div>
 
+                                    <div class="row">
+                                        <div class="col-md-6"><input class="form-control" onChange={this.firstNameChangeHandler} type="text" name="firstName" /></div>
+                                        <div class="col-md-6 "><input class="form-control" onChange={this.lastNameChangeHandler} type="text" name="lastName" /></div>
+                                    </div>
+                                    <br></br>
+                                    <div class="row">
+                                        <div class="col-md-12">   Email</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12"> <input onChange={this.emailChangeHandler} type="text" class="form-control email" name="email" /></div>
+                                    </div>
+                                    <br></br>
+                                    <div class="row">
+                                        <div class="col-md-12">  Password (8 characters minimum)</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12"> <input onChange={this.passwordChangeHandler} type="password" class="form-control email" name="password" /></div>
+                                    </div>
+                                    <br></br>
+                                    <div class="row">
+                                        <div class="col-md-12">Address</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <textarea row="3" onChange={this.addressChangeHandler} type="text" class="email" name="address"></textarea></div>
+                                    </div>
+                                </div>
+                                <br></br>
+                                <button onClick={this.signupHandler} class="btn btn-danger">Sign Up</button>
+                                <br></br><br></br><br></br><br></br>
+                                Have an account?
+                            <a href="/login" class="">     Log In</a>
+
+                            </div>
+
+                        </div>
                     </div>
-                    
                 </div>
-            </div>
-            </div>
             </div>
         )
     }
