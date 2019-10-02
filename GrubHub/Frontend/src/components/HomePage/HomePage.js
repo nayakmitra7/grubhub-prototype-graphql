@@ -18,6 +18,18 @@ class HomePage extends Component {
         this.itemSearchedChangeHandler = this.itemSearchedChangeHandler.bind(this);
        
     }
+    componentDidMount=(e)=>{
+        axios.get('http://localhost:3001/Details/'+sessionStorage.getItem("username"))
+        .then(response => {
+            if(response.status === 200){
+                sessionStorage.setItem("Address",response.data.buyerAddress);
+                sessionStorage.setItem("FirstName",response.data.buyerFirstName);
+                sessionStorage.setItem("BuyerId",response.data.buyerID)
+                return Promise.resolve();
+            }
+          
+        });
+    }
    
     itemSearchedChangeHandler=(e)=>{
         this.setState({itemSearched:e.target.value,searchFlag:false})

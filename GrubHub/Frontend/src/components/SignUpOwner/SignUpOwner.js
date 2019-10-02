@@ -1,23 +1,23 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
-import {Redirect} from 'react-router';
+import { Redirect } from 'react-router';
 
 
 class SignUpOwner extends Component {
-    constructor(){
+    constructor() {
         super();
-        this.state = {  
-            firstName : "",
-            lastName : "",
-            email : "",
-            phone : "",
-            errorMessage :[],
-            passwordError :"",
-            authFlag:false,
-            zipCode:"",
-            restaurant:""
+        this.state = {
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
+            errorMessage: [],
+            passwordError: "",
+            authFlag: false,
+            zipCode: "",
+            restaurant: ""
         }
         this.firstNameChangeHandler = this.firstNameChangeHandler.bind(this);
         this.lastNameChangeHandler = this.lastNameChangeHandler.bind(this);
@@ -27,125 +27,126 @@ class SignUpOwner extends Component {
         this.restaurantChangeHandler = this.restaurantChangeHandler.bind(this);
         this.zipCodeChangeHandler = this.zipCodeChangeHandler.bind(this);
         this.signupHandler = this.signupHandler.bind(this);
-    }  
-    firstNameChangeHandler =(e) =>{
+    }
+    firstNameChangeHandler = (e) => {
         this.setState({
-            firstName : e.target.value
+            firstName: e.target.value
         });
 
     }
-    lastNameChangeHandler =(e) =>{
+    lastNameChangeHandler = (e) => {
         this.setState({
-            lastName : e.target.value
+            lastName: e.target.value
         });
 
-    }  
-    emailChangeHandler =(e) =>{
+    }
+    emailChangeHandler = (e) => {
         this.setState({
-            email : e.target.value
+            email: e.target.value
         });
 
-    }  
-    phoneChangeHandler =(e) =>{
+    }
+    phoneChangeHandler = (e) => {
         this.setState({
-            phone : e.target.value
+            phone: e.target.value
         });
-    } 
-    zipCodeChangeHandler =(e) =>{
+    }
+    zipCodeChangeHandler = (e) => {
         this.setState({
-            zipCode : e.target.value
+            zipCode: e.target.value
         });
-    } 
-    restaurantChangeHandler =(e) =>{
+    }
+    restaurantChangeHandler = (e) => {
         this.setState({
-            restaurant : e.target.value
+            restaurant: e.target.value
         });
-    }  
-    passwordChangeHandler =(e) =>{
+    }
+    passwordChangeHandler = (e) => {
         this.setState({
-            password : e.target.value
+            password: e.target.value
         });
-    }  
-    signupHandler =(e) =>{
+    }
+    signupHandler = (e) => {
         e.preventDefault();
         axios.defaults.withCredentials = true;
+        var data = { firstName: this.state.firstName, lastName: this.state.lastName, phone: this.state.phone, email: this.state.email, restaurant: this.state.restaurant, zipcode: this.state.zipCode, password: this.state.password }
+        axios.post("http://localhost:3001/SignUpOwner", data)
+            .then((response) => {
+                if (response.status === 200) {
+                    sessionStorage.setItem("OwnerFirstName",this.state.firstName)
+                    sessionStorage.setItem("username",this.state.email);
+     
+                    this.setState({
+                        authFlag: true,
+                        errorMessage: []
+                    })
+                } else if (response.status === 201) {
+                    this.setState({
+                        errorMessage: response.data,
+                        authFlag: false
+                    })
+                }
 
-        var data ={firstName:this.state.firstName, lastName:this.state.lastName, phone:this.state.phone, email:this.state.email, restaurant:this.state.restaurant, zipcode:this.state.zipCode,password:this.state.password}
-       axios.post("http://localhost:3001/SignUpOwner",data)
-       .then((response)=>{
-           if(response.status===200){
-               this.setState({
-                authFlag:true,
-                errorMessage:[]
-               })
-               sessionStorage.setItem("username",this.state.username);
-           }else if(response.status===201) {
-               this.setState({
-                   errorMessage: response.data,
-                   authFlag:false
-               })
-           }
-
-       })
+            })
 
     }
-    render(){
+    render() {
 
-        var redirectVar="";
-        if(cookie.load('cookie')){
-            redirectVar = <Redirect to= "/create"/>
+        var redirectVar = "";
+        if (cookie.load('cookie')) {
+            redirectVar = <Redirect to="/SetUpOwner" />
         }
         let displayMessage = null;
-        if(this.state.authFlag==false){
-            displayMessage = ( this.state.errorMessage.map( (error) =>{
+        if (this.state.authFlag == false) {
+            displayMessage = (this.state.errorMessage.map((error) => {
                 return (<li class="li alert-danger">{error.msg}</li>)
             }))
         }
-        return(
+        return (
             <div class="backgroundImgRest">
                 {redirectVar}
-                {displayMessage} 
-            <div class="container">            
-                <div class="login-form">
-                    <div class="main-div">
-                        <div class="panel">
-                            <h2 class="heading"> Create your account</h2>
+                {displayMessage}
+                <div class="container">
+                    <div class="login-form">
+                        <div class="main-div">
+                            <div class="panel">
+                                <h2 class="heading"> Create your account</h2>
+                            </div>
+                            <table>
+                                <div class="form-group">
+                                    <tr><td class="">First Name</td></tr>
+                                    <tr><td class="signup"><input onChange={this.firstNameChangeHandler} type="text" class="form-control" name="firstName" /></td></tr>
+                                    <br></br>
+                                    <tr><td class="">Last Name</td></tr>
+                                    <tr><td class="signup"><input onChange={this.lastNameChangeHandler} type="text" class="form-control" name="lastName" /></td></tr>
+                                    <br></br>
+                                    <tr> Email</tr>
+                                    <tr><input onChange={this.emailChangeHandler} type="text" class="form-control email" name="email" /></tr>
+                                    <br></br>
+
+                                    <tr>Password</tr>
+                                    <tr><input onChange={this.passwordChangeHandler} type="password" class="form-control" name="password" /></tr>
+                                    <br></br>
+                                    <tr>Phone</tr>
+                                    <tr><input onChange={this.phoneChangeHandler} type="number" class="form-control" name="phone" /></tr>
+                                    <br></br>
+                                    <tr>Restaurant Name</tr>
+                                    <tr><input onChange={this.restaurantChangeHandler} type="text" class="form-control email" name="restaurant" /></tr>
+                                    <br></br>
+                                    <tr>Restaurant Zip Code</tr>
+                                    <tr><input onChange={this.zipCodeChangeHandler} type="number" class="form-control" name="ZipCode" /></tr>
+                                </div>
+                                <br></br>
+                                <button onClick={this.signupHandler} class="btn btn-danger">Sign Up</button>
+                                <br></br><br></br>
+                                Have an account?
+                            <a href="/LoginOwner" class="">     Log In</a>
+                            </table>
+
                         </div>
-                    <table>
-                        <div class="form-group">
-                            <tr><td class="">First Name</td></tr>
-                            <tr><td class="signup"><input onChange = {this.firstNameChangeHandler} type="text" class="form-control" name="firstName" /></td></tr>
-                            <br></br>
-                            <tr><td class="">Last Name</td></tr>
-                            <tr><td class="signup"><input onChange = {this.lastNameChangeHandler} type="text" class="form-control" name="lastName" /></td></tr>
-                            <br></br>
-                            <tr> Email</tr>
-                            <tr><input onChange = {this.emailChangeHandler} type="text" class="form-control email" name="email" /></tr>
-                            <br></br>
-                            
-                            <tr>Password</tr>
-                            <tr><input onChange = {this.passwordChangeHandler} type="password" class="form-control" name="password" /></tr>
-                            <br></br>
-                            <tr>Phone</tr>
-                            <tr><input onChange = {this.phoneChangeHandler} type="number" class="form-control" name="phone" /></tr>
-                            <br></br>
-                            <tr>Restaurant Name</tr>
-                            <tr><input onChange = {this.restaurantChangeHandler} type="text" class="form-control email" name="restaurant" /></tr>
-                            <br></br>
-                            <tr>Restaurant Zip Code</tr>
-                            <tr><input onChange = {this.zipCodeChangeHandler} type="number" class="form-control" name="ZipCode" /></tr>
-                        </div>
-                            <br></br>
-                            <button onClick = {this.signupHandler} class="btn btn-danger">Sign Up</button> 
-                            <br></br><br></br>
-                            Have an account?  
-                            <a href="/LoginOwner" class="">     Log In</a>               
-                        </table>
 
                     </div>
-                    
                 </div>
-            </div>
             </div>
         )
     }

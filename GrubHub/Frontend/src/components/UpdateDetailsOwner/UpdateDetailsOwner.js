@@ -41,8 +41,8 @@ class UpdateDetailsOwner extends Component {
 
 
     componentDidMount() {
+        var data = ""
         console.log(sessionStorage.getItem("username"))
-        var data = { username: sessionStorage.getItem("username") }
         Axios.get('http://localhost:3001/DetailsOwner/' + sessionStorage.getItem("username"))
             .then(response => {
 
@@ -155,19 +155,17 @@ class UpdateDetailsOwner extends Component {
             this.promise1().then(() => {
                 Axios.post('http://localhost:3001/UpdateRestaurant', restData)
                     .then(response => {
-                        console.log("Status Code : ", response.status);
+                        sessionStorage.setItem("OwnerFirstName",this.state.firstName)
+
+                        sessionStorage.setItem("RestaurantName",this.state.restaurantName)
                         if (response.status === 200) {
                             this.setState({
                                 errorFlag: "Success",
                                 readOnly: true
                             })
                             setTimeout(() => {
-                                this.setState({
-                                    errorFlag: "No update",
-                                    readOnly: true
-                                });
-                            }, 4000);
-
+                                window.location.reload();
+                               }, 500);
 
                         }
                         else if (response.status === 201) {

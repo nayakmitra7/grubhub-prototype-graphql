@@ -15,6 +15,10 @@ import SearchPage from './SearchPage/SearchPage'
 import DetailsPage from './DetailsPage/DetailsPage'
 import ReviewPage from './ReviewPage/ReviewPage'
 import UpcomingOrder from './UpcomingOrder/UpcomingOrder'
+import PastOrder from './PastOrder/PastOrder'
+import PastOrderOwner from './PastOrderOwner/PastOrderOwner'
+import SetUpOwner from './SetUpOwner/SetUpOwner'
+
 class Main extends Component {
     render(){
         return(
@@ -35,6 +39,9 @@ class Main extends Component {
                 <Route path="/DetailsPage" component={DetailsPage}/>
                 <Route path="/ReviewPage" component={ReviewPage}/>
                 <Route path="/UpcomingOrder" component={UpcomingOrder}/>
+                <Route path="/PastOrder" component={PastOrder}/>
+                <Route path="/PastOrderOwner" component={PastOrderOwner}/>
+                <Route path="/SetUpOwner" component={SetUpOwner}/>
 
                 
             </div>

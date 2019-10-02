@@ -282,7 +282,7 @@ app.get('/Details/(:data)', function (req, res, next) {
     })
 })
 app.get('/DetailsOwner/(:data)', function (req, res, next) {
-    var query = 'Select ownerId,ownerFirstName,ownerLastName,ownerEmail,ownerPassword,ownerPhone,restaurantId from owner where ownerEmail="' + req.params.data + '"'
+    var query = 'Select ownerId,ownerFirstName,ownerLastName,ownerEmail,ownerPassword,ownerPhone,owner.restaurantId,restaurantName from sys.owner,sys.restaurant where owner.restaurantId=restaurant.restaurantId and ownerEmail= "' + req.params.data + '"'
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {
@@ -666,37 +666,33 @@ app.get('/RestaurantSearched/(:data)', function (req, res, next) {
         }
     })
 })
-fetchOrder = (req) => {
-    return new Promise((resolve, reject) => {
-        
-    })
-}
+
 app.post('/Order', function (req, res, next) {
     var message = [];
-     var query="Insert INTO sys.order (restaurantId,buyerId,buyerAddress,orderStatus,orderDetails,orderDate) values ('"+req.body.restaurantId+"','"+req.body.buyerID+"','"+req.body.buyerAddress+"','"+"New"+"','"+req.body.bag+"','"+req.body.date+"')"
-        pool.query(query, function (err, result, fields) {
-            if (err) {
-                res.writeHead(201, {
-                    'Content-Type': 'text/plain'
-                });
-                errors = { msg: "Something went wrong" }
-                message.push(errors);
-                res.end(JSON.stringify(message));
-            } else {
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-                errors = { msg: "Order Placed" }
-                message.push(errors);
-                res.end(JSON.stringify(message));
-            }
-        })
+    var query = "Insert INTO sys.order (restaurantId,buyerId,buyerAddress,orderStatus,orderDetails,orderDate) values ('" + req.body.restaurantId + "','" + req.body.buyerID + "','" + req.body.buyerAddress + "','" + "New" + "','" + req.body.bag + "','" + req.body.date + "')"
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Order Placed" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        }
+    })
 
 
 })
-app.get('/Orders/(:data)', function (req, res, next) {
+app.get('/UpcomingOrders/(:data)', function (req, res, next) {
     var message = [];
-    var query = 'Select restaurantName,buyerAddress,orderStatus,orderDetails,orderDate,orderId from sys.order,sys.restaurant where order.restaurantId=restaurant.restaurantId and buyerId=' + req.params.data 
+    var query = 'Select restaurantName,buyerAddress,orderStatus,orderDetails,orderDate,orderId from sys.order,sys.restaurant where (order.orderStatus !="Delivered" and order.orderStatus!="Cancelled" )and order.restaurantId=restaurant.restaurantId and buyerId=' + req.params.data
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {
@@ -713,5 +709,193 @@ app.get('/Orders/(:data)', function (req, res, next) {
         }
     })
 })
+
+app.get('/OrdersOwner/(:data)', function (req, res, next) {
+    var message = [];
+    var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where (orderStatus="Delivered" or orderStatus="Cancelled") and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            console.log(err)
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+        }
+    })
+})
+app.get('/OrdersOwnerNew/(:data)', function (req, res, next) {
+    var message = [];
+    var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="New" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            console.log(err)
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+        }
+    })
+})
+app.get('/OrdersOwnerConfirmed/(:data)', function (req, res, next) {
+    var message = [];
+    var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="Confirmed" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            console.log(err)
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+        }
+    })
+})
+app.get('/OrdersOwnerPreparing/(:data)', function (req, res, next) {
+    var message = [];
+    var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="Preparing" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            console.log(err)
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+        }
+    })
+})
+app.get('/OrdersOwnerReady/(:data)', function (req, res, next) {
+    var message = [];
+    var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="Ready" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            console.log(err)
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+        }
+    })
+})
+app.get('/OrdersOwnerCancelled/(:data)', function (req, res, next) {
+    var message = [];
+    var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="Cancelled" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            console.log(err)
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+        }
+    })
+})
+app.post('/CancelOrder',
+    function (req, res, next) {
+        
+        var query = 'update sys.order set orderStatus="Cancelled" where orderId=' + req.body.id 
+        console.log(query)
+        pool.query(query, function (err, result, fields) {
+            if (err) {
+                res.writeHead(201, {
+                    'Content-Type': 'text/plain'
+                });
+                errors = { msg: "Something went wrong" }
+                console.log(err)
+                message.push(errors);
+                res.end(JSON.stringify(message));
+            } else {
+                res.writeHead(200, {
+                    'Content-Type': 'text/plain'
+                });
+                res.end("Success");
+            }
+
+        })
+
+    })
+app.post('/statusChange',
+    function (req, res, next) {
+        var query = 'update sys.order set orderStatus="'+req.body.status+'" where orderId=' + req.body.id 
+        console.log(query)
+        pool.query(query, function (err, result, fields) {
+            if (err) {
+                res.writeHead(201, {
+                    'Content-Type': 'text/plain'
+                });
+                errors = { msg: "Something went wrong" }
+                console.log(err)
+                message.push(errors);
+                res.end(JSON.stringify(message));
+            } else {
+                res.writeHead(200, {
+                    'Content-Type': 'text/plain'
+                });
+                res.end("Success");
+            }
+
+        })
+
+    })
+
+    app.get('/PastOrders/(:data)', function (req, res, next) {
+        var message = [];
+        var query = 'Select restaurantName,buyerAddress,orderStatus,orderDetails,orderDate,orderId from sys.order,sys.restaurant where (order.orderStatus ="Delivered" or order.orderStatus="Cancelled" )and order.restaurantId=restaurant.restaurantId and buyerId=' + req.params.data
+        pool.query(query, function (err, result, fields) {
+            if (err) {
+                res.writeHead(201, {
+                    'Content-Type': 'text/plain'
+                });
+                errors = { msg: "Something went wrong" }
+                message.push(errors);
+                res.end(JSON.stringify(message));
+            } else {
+                res.writeHead(200, {
+                    'Content-Type': 'text/plain'
+                });
+                res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+            }
+        })
+    })
 app.listen(3001);
 console.log("Server Listening on port 3001");

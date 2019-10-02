@@ -32,13 +32,26 @@ class LoginOwner extends Component{
             password : e.target.value
         })
     }
+    fetchDetails = (username)=>{
+        axios.get('http://localhost:3001/DetailsOwner/'+username)
+        .then(response => {
+            if(response.status === 200){
+                sessionStorage.setItem("OwnerFirstName",response.data.ownerFirstName);
+                sessionStorage.setItem("RestaurantId",response.data.restaurantId)
+                sessionStorage.setItem("RestaurantName",response.data.restaurantName)
+
+                return Promise.resolve();
+            }
+          
+        });
+    }
     submitLogin = (e) => {
-        var headers = new Headers();
         e.preventDefault();
         const data = {
             username : this.state.username,
             password : this.state.password
         }
+        this.fetchDetails(this.state.username);
         axios.defaults.withCredentials = true;
         axios.post('http://localhost:3001/loginOwner',data)
             .then(response => {

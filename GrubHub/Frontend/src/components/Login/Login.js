@@ -40,15 +40,12 @@ class Login extends Component{
                 sessionStorage.setItem("Address",response.data.buyerAddress);
                 sessionStorage.setItem("FirstName",response.data.buyerFirstName);
                 sessionStorage.setItem("BuyerId",response.data.buyerID)
-                console.log(sessionStorage.getItem("BuyerId"));
                 return Promise.resolve();
             }
           
         });
     }
-    submitLogin = (e) => {
-        var headers = new Headers();
-        
+    submitLogin = (e) => {        
         e.preventDefault();
         const data = {
             username : this.state.username,
@@ -61,7 +58,6 @@ class Login extends Component{
             .then(response => {
                 if(response.status === 200){
                     sessionStorage.setItem("username",this.state.username);
-                    //this.fetchDetails();
                     this.setState({
                         authFlag : true
                     })

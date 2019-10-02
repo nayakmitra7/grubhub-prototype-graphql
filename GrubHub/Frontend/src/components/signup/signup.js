@@ -57,7 +57,9 @@ class signup extends Component {
         axios.post("http://localhost:3001/signup", data)
             .then((response) => {
                 sessionStorage.setItem("username",this.state.email)
+                sessionStorage.setItem("FirstName",this.state.firstName)
                 if (response.status === 200) {
+
                     this.setState({
                         authFlag: true,
                         errorMessage: []
@@ -77,7 +79,7 @@ class signup extends Component {
 
         var redirectVar = "";
         if (cookie.load('cookie')) {
-            redirectVar = <Redirect to="/UpdateDetails" />
+            redirectVar = <Redirect to="/HomePage" />
         }
         let displayMessage = null;
         if (this.state.authFlag == false) {

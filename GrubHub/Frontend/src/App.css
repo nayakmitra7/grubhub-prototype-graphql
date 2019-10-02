@@ -115,6 +115,15 @@ margin: 90px ;
   background-position: 00px 50px;
 
 }
+.NoOrder{
+  background-position: 250px 00px;
+
+  margin-top: 0px;
+  background-image: url('./No_orders.png');
+  background-repeat: no-repeat;
+padding-right: 500px;
+padding-bottom: 600px
+}
 .home{
   background-image: url('./searchPage.jpg');
   background-repeat: no-repeat;

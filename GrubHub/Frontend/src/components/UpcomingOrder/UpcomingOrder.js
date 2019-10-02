@@ -18,11 +18,10 @@ class UpcomingOrder extends Component {
 
     }
     componentDidMount() {
-        axios.get('http://localhost:3001/Orders/' + sessionStorage.getItem("BuyerId"))
+        axios.get('http://localhost:3001/UpcomingOrders/' + sessionStorage.getItem("BuyerId"))
             .then(response => {
                 if (response.status === 200) {
                     this.setState({ orders: response.data })
-                    console.log(response.data)
                 }
 
             });
@@ -34,8 +33,7 @@ class UpcomingOrder extends Component {
                 return order
             }
         })
-        console.log(order)
-        console.log(JSON.parse(order[0].orderDetails))
+      
         this.setState({
             orderStatus: order[0].orderStatus,
             restaurantName: order[0].restaurantName,
@@ -58,10 +56,10 @@ class UpcomingOrder extends Component {
         if (this.state.orders.length) {
 
         } else {
-            array.push(<div>No Orders Yet</div>)
+            array.push(<div class="NoOrder"></div>)
         }
         this.state.orders.map((order) => {
-            if (order.orderStatus != "Delivered") {
+            if (order.orderStatus != "Delivered" && order.orderStatus != "Cancelled" ) {
                 var val = JSON.parse(order.orderDetails);
                 var array2 = []
 
@@ -96,6 +94,7 @@ class UpcomingOrder extends Component {
                 <div class="col-md-2">{item.itemCostTotal}</div>
             </div>)
         })
+        sum=sum.toFixed(2);
         items.push(<br></br>)
         items.push(<hr style={{ borderBottom: "1px solid black" }}></hr>)
         items.push(<div class="row" style={{marginRight:'20px'}}>
@@ -117,17 +116,17 @@ class UpcomingOrder extends Component {
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Order Confirmed </div>)
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Preparing</div>)
                 break;
-            case 'Picked Up':
+            case 'Ready':
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Order Placed</div>)
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Order Confirmed </div>)
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Preparing</div>)
-                progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Picked Up</div>)
+                progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Ready</div>)
                 break;
             case 'Delivered':
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Order Placed</div>)
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Order Confirmed </div>)
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Preparing</div>)
-                progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Picked Up</div>)
+                progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Ready</div>)
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Delivered</div>)
 
                 break;
@@ -154,7 +153,7 @@ class UpcomingOrder extends Component {
                                     <div class="col-md-1"><button type="button" id="closeSection" data-dismiss="modal" onClick={this.modalClose}>&times;</button></div>
                                 </div>
                             </div>
-                            <div class="modal-body" style={{height:'500px'}}>
+                            <div class="modal-body" style={{height:'200%'}}>
                                 <div class="row" style={{ marginBottom: '20px', textAlign: 'center' }}><h3>{this.state.restaurantName}</h3></div>
                                 <div class="progress" style={{ marginBottom: '90px' }}>
                                     {progressBar}

@@ -458,7 +458,7 @@ class MenuOwner extends Component {
             <div>
                 {redirectVar}
                 <div class="row">
-                    <div class="col-md-12"> <p align="center" style={{ backgroundColor: "#d9d9d9", fontSize: '50px', color: '#000000', paddingLeft: '20px', paddingRight: '20px', }}>Menu</p></div>
+                    <div class="col-md-12"> <p align="center" style={{ fontSize: '50px', color: 'crimson', paddingLeft: '20px', paddingRight: '20px', }}>{sessionStorage.getItem("RestaurantName")}</p></div>
                 </div>
 
                 <div class="row">
