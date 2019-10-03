@@ -40,21 +40,21 @@ class DetailsPage extends Component {
     }
     CheckOut = () => {
         this.setState({ checkoutFlag: true })
-        var today=new Date();
-        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-        var time =today.getHours() + ":" + today.getMinutes();
-        var CurrentDateTime = date+' '+time
-        var data ={restaurantId:this.state.restaurantId,buyerID:sessionStorage.getItem("BuyerId"),buyerAddress:sessionStorage.getItem("Address"),orderStatus:"New",bag:localStorage.getItem(sessionStorage.getItem("username")),date:CurrentDateTime}
-        axios.post('http://localhost:3001/Order',data)
-        .then(response => {
-            if(response.status === 200){
-              this.setState({bag:[]})
-              localStorage.removeItem(sessionStorage.getItem("username"))
-            }
-            else if(response.status === 201){
-                
-            }
-        });
+        var today = new Date();
+        var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        var time = today.getHours() + ":" + today.getMinutes();
+        var CurrentDateTime = date + ' ' + time
+        var data = { restaurantId: this.state.restaurantId, buyerID: sessionStorage.getItem("BuyerId"), buyerAddress: sessionStorage.getItem("Address"), orderStatus: "New", bag: localStorage.getItem(sessionStorage.getItem("username")), date: CurrentDateTime }
+        axios.post('http://localhost:3001/Order', data)
+            .then(response => {
+                if (response.status === 200) {
+                    this.setState({ bag: [] })
+                    localStorage.removeItem(sessionStorage.getItem("username"))
+                }
+                else if (response.status === 201) {
+
+                }
+            });
     }
     openShoppingCart = () => {
         document.getElementById("shoppingCart").style.display = "block";
@@ -169,7 +169,6 @@ class DetailsPage extends Component {
 
             axios.get('http://localhost:3001/items/' + this.state.restaurantId)
                 .then(response => {
-                    console.log("Status Code ss: ", response.data);
                     if (response.status === 200) {
                         this.setState({
                             itemsPresent: response.data
@@ -303,18 +302,21 @@ class DetailsPage extends Component {
                     if (item.SectionId == section.menuSectionId) {
                         flag = 1;
                         array.push(
-                            <div class="row embossed-heavy" style={{ marginBottom: '15px', borderStyle: "groove", paddingTop: '5px', paddingBottom: '5px', marginRight: '10px', backgroundColor: 'white' }}>
+                            <div class="row embossed-heavy" style={{ marginBottom: '15px', borderStyle: "groove", paddingTop: '5px', paddingBottom: '5px', paddingRight: '0px', marginRight: '0px', backgroundColor: 'white' }}>
                                 <span class="border border-dark" style={{ marginLeft: '10px' }}>
-
-                                    <div class="col-md-5">
-                                        <div class="row" style={{ fontSize: "15px", fontWeight: "600", color: "blue", marginLeft: "10px", marginTop: "10px" }}>
+                                <div class="col-md-4" style={{ textAlign: "left" }}>
+                                        <img style={{ width: "70%", paddingBottom: "10px",paddingTop:"10px" }} src={item.itemImage} class="rounded" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="row" style={{ fontSize: "15px", fontWeight: "600", color: "blue", marginLeft: "10px", marginTop: "0px" }}>
                                             <p onClick={this.addItemModal} id={item.ItemId}>{item.ItemName}</p></div>
                                         <div class="row" style={{ marginLeft: "10px", marginBottom: "10px" }}>{item.ItemDesc}</div>
                                     </div>
-                                    <div class="col-md-3"></div>
+                                    <div class="col-md-1"></div>
                                     <div class="col-md-2">
-                                        <div class="row" ><p style={{ color: 'red' }}>${item.ItemPrice}</p></div>
+                                        <div class="row"style={{ textAlign: "right" }} ><p style={{ color: 'red' }}>${item.ItemPrice}</p></div>
                                     </div>
+                                   
 
 
                                 </span></div>)
@@ -350,7 +352,7 @@ class DetailsPage extends Component {
                 <div class="row ">
                     <div class="col-md-2" style={{ marginTop: '0px', paddingLeft: '20px', paddingRight: '0px' }}>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-5">
                         {array}
                     </div>
                     <div class="col-md-4"></div>

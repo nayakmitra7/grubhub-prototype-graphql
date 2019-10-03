@@ -3,6 +3,7 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var session = require('express-session');
+const multer = require('multer');
 var cookieParser = require('cookie-parser');
 const { check, validationResult } = require('express-validator');
 var pool = require('./Base.js');
@@ -15,6 +16,7 @@ app.set('view engine', 'ejs');
 
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 
+app.use('/uploads',express.static('uploads'))
 
 app.use(session({
     secret: 'cmpe273_kafka_passport_mongo',
@@ -29,7 +31,6 @@ app.use(session({
 
 app.use(bodyParser.json());
 
-
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -40,7 +41,194 @@ app.use(function (req, res, next) {
 });
 
 
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads');
+    },
+    filename: function (req, file, cb) {
+        var filename = "profileImage"+file.originalname+".jpeg";
+        cb(null, filename);
+    }
+});
+var upload = multer({ storage: storage });
 
+var storage2 = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads');
+    },
+    filename: function (req, file, cb) {
+        var filename = "itemImage"+file.originalname+".jpeg";
+        cb(null, filename);
+    }
+});
+var upload2 = multer({ storage: storage2 });
+
+var storage3 = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads');
+    },
+    filename: function (req, file, cb) {
+        var filename = "ownerImage"+file.originalname+".jpeg";
+        cb(null, filename);
+    }
+});
+var upload3 = multer({ storage: storage3 });
+
+var storage4 = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads');
+    },
+    filename: function (req, file, cb) {
+        var filename = "restaurantImage"+file.originalname+".jpeg";
+        cb(null, filename);
+    }
+});
+var upload4 = multer({ storage: storage4 });
+
+app.post('/restaurant/image', upload4.single('myImage'), function(req, res, next){
+    var message=[]
+    console.log("Hi")
+    var data = "http://localhost:3001/uploads/restaurantImage"+req.file.originalname +".jpeg"
+    var query = 'update restaurant set restaurantImage="' + data+'"  where restaurantId="' + req.file.originalname+ '"'
+    console.log(query)
+        pool.query(query, function (err, result, fields) {
+            if (err) {
+                res.writeHead(201, {
+                    'Content-Type': 'text/plain'
+                });
+                errors = { msg: "Something went wrong" }
+                message.push(errors);
+                res.end(JSON.stringify(message));
+            } else {
+                res.writeHead(200, {
+                    'Content-Type': 'text/plain'
+                });
+                res.end("Success");
+            }
+        })
+});
+app.get('/restaurant/image/(:data)',function(req, res, next){
+    var query = 'Select restaurantImage from restaurant where restaurantId="' + req.params.data + '"'
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(result[0]));
+        }
+    })
+
+})
+
+
+
+app.post('/owner/image', upload3.single('myImage'), function(req, res, next){
+    var message=[]
+    console.log("Hi")
+    var data = "http://localhost:3001/uploads/ownerImage"+req.file.originalname +".jpeg"
+    var query = 'update owner set ownerImage="' + data+'"  where ownerId="' + req.file.originalname+ '"'
+    console.log(query)
+        pool.query(query, function (err, result, fields) {
+            if (err) {
+                res.writeHead(201, {
+                    'Content-Type': 'text/plain'
+                });
+                errors = { msg: "Something went wrong" }
+                message.push(errors);
+                res.end(JSON.stringify(message));
+            } else {
+                res.writeHead(200, {
+                    'Content-Type': 'text/plain'
+                });
+                res.end("Success");
+            }
+        })
+});
+app.get('/owner/image/(:data)',function(req, res, next){
+    var query = 'Select ownerImage from owner where ownerId="' + req.params.data + '"'
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(result[0]));
+        }
+    })
+
+})
+app.post('/upload/ItemPhoto', upload2.single('myImage'), function(req, res, next){
+    var message=[]
+    var data = "http://localhost:3001/uploads/itemImage"+req.file.originalname +".jpeg"
+    var query = 'update menuItems set itemImage="' + data+'"  where itemId="' + req.file.originalname+ '"'
+        pool.query(query, function (err, result, fields) {
+            if (err) {
+                res.writeHead(201, {
+                    'Content-Type': 'text/plain'
+                });
+                errors = { msg: "Something went wrong" }
+                message.push(errors);
+                res.end(JSON.stringify(message));
+            } else {
+                res.writeHead(200, {
+                    'Content-Type': 'text/plain'
+                });
+                res.end("Success");
+            }
+        })
+});
+app.post('/upload/photo', upload.single('myImage'), function(req, res, next){
+    var message=[]
+    var data = "http://localhost:3001/uploads/profileImage"+req.file.originalname +".jpeg"
+    var query = 'update buyer set buyerImage="' + data+'"  where buyerID="' + req.file.originalname+ '"'
+        pool.query(query, function (err, result, fields) {
+            if (err) {
+                res.writeHead(201, {
+                    'Content-Type': 'text/plain'
+                });
+                errors = { msg: "Something went wrong" }
+                message.push(errors);
+                res.end(JSON.stringify(message));
+            } else {
+                res.writeHead(200, {
+                    'Content-Type': 'text/plain'
+                });
+                res.end("Success");
+            }
+        })
+});
+app.get('/photo/(:data)',function(req, res, next){
+    var query = 'Select buyerImage from buyer where buyerID="' + req.params.data + '"'
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(result[0]));
+        }
+    })
+
+})
 
 app.post('/login', [check("username", "Please fill in the User Name.").not().isEmpty(), check("password", "Please fill in the Password.  ").not().isEmpty()], function (req, res) {
     var message = validationResult(req).errors;
@@ -281,6 +469,10 @@ app.get('/Details/(:data)', function (req, res, next) {
         }
     })
 })
+app.get('/image', function (req, res, next) {
+    res.sendFile('/Users/mitranayak/Documents/273/react/ReactLab1BeforeRedux/GrubHub/Backend/uploads/1570006739761.png');
+
+})
 app.get('/DetailsOwner/(:data)', function (req, res, next) {
     var query = 'Select ownerId,ownerFirstName,ownerLastName,ownerEmail,ownerPassword,ownerPhone,owner.restaurantId,restaurantName from sys.owner,sys.restaurant where owner.restaurantId=restaurant.restaurantId and ownerEmail= "' + req.params.data + '"'
     pool.query(query, function (err, result, fields) {
@@ -488,7 +680,8 @@ app.post('/item',
     check("itemPrice", "Item Price is needed.").not().isEmpty(),
     check("itemSection", "Item Section is needed.").not().isEmpty()]
     , function (req, res, next) {
-        var query = 'Insert into menuItems (ItemName,ItemPrice,ItemDesc,SectionId,restaurantId) values ("' + req.body.itemName + '","' + req.body.itemPrice + '","' + req.body.itemDesc + '","' + req.body.itemSection + '","' + req.body.restaurantId + '")'
+   
+       var query = 'Insert into menuItems (ItemName,ItemPrice,ItemDesc,SectionId,restaurantId) values ("' + req.body.itemName + '","' + req.body.itemPrice + '","' + req.body.itemDesc + '","' + req.body.itemSection + '","' + req.body.restaurantId + '")'
         var message = validationResult(req).errors;
         if (message.length > 0) {
             res.writeHead(201, {
@@ -515,7 +708,7 @@ app.post('/item',
     })
 
 app.get('/items/(:data)', function (req, res, next) {
-    var query = 'Select ItemName,SectionId,ItemPrice,ItemDesc,ItemId from menuItems where restaurantId="' + req.params.data + '"'
+    var query = 'Select ItemName,SectionId,ItemPrice,ItemDesc,ItemId,itemImage from menuItems where restaurantId="' + req.params.data + '"'
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {
@@ -649,7 +842,7 @@ app.delete('/sections/(:data)', function (req, res, next) {
 })
 app.get('/RestaurantSearched/(:data)', function (req, res, next) {
     var message = [];
-    var query = 'select restaurantId,restaurantName,restaurantCuisine,restaurantAddress from restaurant where restaurantId in (SELECT restaurantId FROM menuItems where ItemName like "%' + req.params.data + '%")'
+    var query = 'select restaurantId,restaurantName,restaurantCuisine,restaurantAddress,restaurantImage from restaurant where restaurantId in (SELECT restaurantId FROM menuItems where ItemName like "%' + req.params.data + '%")'
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {
@@ -832,8 +1025,8 @@ app.get('/OrdersOwnerCancelled/(:data)', function (req, res, next) {
 })
 app.post('/CancelOrder',
     function (req, res, next) {
-        
-        var query = 'update sys.order set orderStatus="Cancelled" where orderId=' + req.body.id 
+
+        var query = 'update sys.order set orderStatus="Cancelled" where orderId=' + req.body.id
         console.log(query)
         pool.query(query, function (err, result, fields) {
             if (err) {
@@ -856,7 +1049,7 @@ app.post('/CancelOrder',
     })
 app.post('/statusChange',
     function (req, res, next) {
-        var query = 'update sys.order set orderStatus="'+req.body.status+'" where orderId=' + req.body.id 
+        var query = 'update sys.order set orderStatus="' + req.body.status + '" where orderId=' + req.body.id
         console.log(query)
         pool.query(query, function (err, result, fields) {
             if (err) {
@@ -878,24 +1071,45 @@ app.post('/statusChange',
 
     })
 
-    app.get('/PastOrders/(:data)', function (req, res, next) {
-        var message = [];
-        var query = 'Select restaurantName,buyerAddress,orderStatus,orderDetails,orderDate,orderId from sys.order,sys.restaurant where (order.orderStatus ="Delivered" or order.orderStatus="Cancelled" )and order.restaurantId=restaurant.restaurantId and buyerId=' + req.params.data
-        pool.query(query, function (err, result, fields) {
-            if (err) {
-                res.writeHead(201, {
-                    'Content-Type': 'text/plain'
-                });
-                errors = { msg: "Something went wrong" }
-                message.push(errors);
-                res.end(JSON.stringify(message));
-            } else {
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-                res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
-            }
-        })
+app.get('/PastOrders/(:data)', function (req, res, next) {
+    var message = [];
+    var query = 'Select restaurantName,buyerAddress,orderStatus,orderDetails,orderDate,orderId from sys.order,sys.restaurant where (order.orderStatus ="Delivered" or order.orderStatus="Cancelled" )and order.restaurantId=restaurant.restaurantId and buyerId=' + req.params.data
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+        }
     })
+})
+app.get('/maxItemId/(:data)', function (req, res, next) {
+    var message = [];
+    var query = 'Select max(ItemId) as val from sys.menuItems where restaurantId =' + req.params.data
+    console.log(query)
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result[0])).val) )
+        }
+    })
+})
+
 app.listen(3001);
 console.log("Server Listening on port 3001");

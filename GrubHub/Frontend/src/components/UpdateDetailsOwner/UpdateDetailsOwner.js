@@ -14,7 +14,10 @@ class UpdateDetailsOwner extends Component {
             firstName: "",
             lastName: "",
             email: "",
-            pictures: [],
+            file: null,
+            file2: null,
+            filePreview: null,
+            filePreview2: null,
             phone: "",
             errorMessage: [],
             authFlag: true,
@@ -37,6 +40,9 @@ class UpdateDetailsOwner extends Component {
         this.restaurantCuisineChangeHandler = this.restaurantCuisineChangeHandler.bind(this);
         this.restaurantAddressChangeHandler = this.restaurantAddressChangeHandler.bind(this);
         this.restaurantZipCodeChangeHandler = this.restaurantZipCodeChangeHandler.bind(this);
+        this.pictureChangeHandler = this.pictureChangeHandler.bind(this)
+        this.pictureChangeHandler2 = this.pictureChangeHandler2.bind(this)
+
     }
 
 
@@ -57,8 +63,11 @@ class UpdateDetailsOwner extends Component {
                         ownerId: response.data.ownerId,
                         restaurantId: response.data.restaurantId
                     })
-                    console.log(response);
-
+                    axios.get("http://localhost:3001/owner/image/" + response.data.ownerId).then(responses => {
+                        this.setState({
+                            file: responses.data.ownerImage
+                        })
+                    })
                 } else if (response.status === 201) {
                     this.setState({
                         errorFlag: "Some error",
@@ -69,9 +78,15 @@ class UpdateDetailsOwner extends Component {
                 if (this.state.restaurantId) {
                     data = this.state.restaurantId;
                     axios.get('http://localhost:3001/DetailsRestaurant/' + data).then((responses) => {
+                        axios.get("http://localhost:3001/restaurant/image/" + this.state.restaurantId).then(responses => {
+                            this.setState({
+                                file2: responses.data.restaurantImage
+                            })
+                        })
+
                         this.setState({
                             restaurantName: responses.data.restaurantName,
-                            restaurantCuisine: responses.data.restaurantCuisine,
+                            restaurantCuisine: responses.data.restaurantCuisine != null ? responses.data.restaurantCuisine : "",
                             restaurantAddress: responses.data.restaurantAddress,
                             restaurantZipCode: responses.data.restaurantZipCode
                         })
@@ -79,7 +94,60 @@ class UpdateDetailsOwner extends Component {
                 }
             })
     }
+    uploadImageHandler = (e) => {
+        if (this.state.file) {
+            e.preventDefault();
+            let formData = new FormData();
+            formData.append('myImage', this.state.file, this.state.ownerId);
+            const config = {
+                headers: {
+                    'content-type': 'multipart/form-data'
+                }
+            };
+            axios.post("/owner/image", formData, config)
+                .then((response) => {
+                    alert("The file is successfully uploaded");
+                }).catch((error) => {
+                });
+        }
 
+    }
+    uploadImageHandler2 = (e) => {
+        if (this.state.file) {
+            e.preventDefault();
+            let formData = new FormData();
+            formData.append('myImage', this.state.file2, this.state.restaurantId);
+            const config = {
+                headers: {
+                    'content-type': 'multipart/form-data'
+                }
+            };
+            axios.post("/restaurant/image", formData, config)
+                .then((response) => {
+                    alert("The file is successfully uploaded");
+                }).catch((error) => {
+                });
+        }
+
+    }
+    pictureChangeHandler(event) {
+        if (event.target.files[0]) {
+            this.setState({
+                file: event.target.files[0],
+                filePreview: URL.createObjectURL(event.target.files[0])
+            });
+        }
+
+    }
+    pictureChangeHandler2(event) {
+        if (event.target.files[0]) {
+            this.setState({
+                file2: event.target.files[0],
+                filePreview2: URL.createObjectURL(event.target.files[0])
+            });
+        }
+
+    }
     firstNameChangeHandler = (e) => {
         this.setState({
             firstName: e.target.value
@@ -155,9 +223,9 @@ class UpdateDetailsOwner extends Component {
             this.promise1().then(() => {
                 Axios.post('http://localhost:3001/UpdateRestaurant', restData)
                     .then(response => {
-                        sessionStorage.setItem("OwnerFirstName",this.state.firstName)
+                        sessionStorage.setItem("OwnerFirstName", this.state.firstName)
 
-                        sessionStorage.setItem("RestaurantName",this.state.restaurantName)
+                        sessionStorage.setItem("RestaurantName", this.state.restaurantName)
                         if (response.status === 200) {
                             this.setState({
                                 errorFlag: "Success",
@@ -165,7 +233,7 @@ class UpdateDetailsOwner extends Component {
                             })
                             setTimeout(() => {
                                 window.location.reload();
-                               }, 500);
+                            }, 500);
 
                         }
                         else if (response.status === 201) {
@@ -183,7 +251,10 @@ class UpdateDetailsOwner extends Component {
     }
     render() {
         let redirectVar = "";
-
+        let image = <div class="img" style={{ paddingTop: '20px' }}><img style={{ width: "80%" }} src="//placehold.it/5000x3000" class="img-thumbnail" /></div>
+        let uploadImage = "";
+        let image2 = <div class="img" style={{ paddingTop: '20px' }}><img style={{ width: "80%" }} src="//placehold.it/5000x3000" class="img-thumbnail" /></div>
+        let uploadImage2 = ""
         if (!cookie.load('cookie')) {
             redirectVar = <Redirect to="/LoginOwner" />
         }
@@ -195,61 +266,104 @@ class UpdateDetailsOwner extends Component {
         } else if (this.state.errorFlag == "Success") {
             messageDisplay = (<ul class="li alert alert-success">Successfully Updated !!!</ul>);
         }
+        if (this.state.filePreview) {
+            image = <div class="img" style={{ paddingBottom: '20px' }}><img style={{ width: "80%" }} src={this.state.filePreview} class="img-thumbnail" onChange={this.pictureChangeHandler} /></div>
+            uploadImage = <button onClick={this.uploadImageHandler}>Upload Image</button>
 
+        } else if (this.state.file) {
+            image = <div class="img" style={{ paddingBottom: '20px' }}><img style={{ width: "80%" }} src={this.state.file} class="img-thumbnail" onChange={this.pictureChangeHandler} /></div>
+        }
+
+        if (this.state.filePreview2) {
+            image2 = <div class="img" style={{ paddingBottom: '20px' }}><img style={{ width: "80%" }} src={this.state.filePreview2} class="img-thumbnail" onChange={this.pictureChangeHandler2} /></div>
+            uploadImage2 = <button onClick={this.uploadImageHandler2}>Upload Image</button>
+
+        } else if (this.state.file2) {
+            image2 = <div class="img" style={{ paddingBottom: '20px' }}><img style={{ width: "80%" }} src={this.state.file2} class="img-thumbnail" onChange={this.pictureChangeHandler2} /></div>
+        }
         let createDisplay = (
             <div>
                 <div>
-                    <table class="updateTable">
-                        <div class="form-group" >
-                            <br></br><br></br>
-                            <tr>
-                                <a href="#" onClick={this.readOnlyHandler} class="btn btn-info btn-sm">
-                                    <span class="glyphicon glyphicon-edit"></span> Edit
-        </a>
-                            </tr>
-                            <br></br><br></br>
-                            <tr>
-                                <td class="">First Name </td>
-                                <td class="">Last Name</td>
-                            </tr>
-                            <tr>
-                                <td class="signup"><input value={this.state.firstName} onChange={this.firstNameChangeHandler} type="text" class="form-control" name="firstName" readOnly={this.state.readOnly} /></td>
-                                <td class="signup"><input value={this.state.lastName} onChange={this.lastNameChangeHandler} type="text" class="form-control" name="lastName" readOnly={this.state.readOnly} /></td>
-                            </tr>
-                            <br></br>
-                            <tr>Email</tr>
-                            <tr>
-                                <input onChange={this.emailChangeHandler} value={this.state.email} type="text" class="form-control email" name="email" readOnly={this.state.readOnly} />
-                            </tr>
-                            <br></br>
-                            <tr>Phone</tr>
-                            <tr>
-                                <input onChange={this.phoneChangeHandler} value={this.state.phone} type="text" class="form-control email" name="phone" readOnly={this.state.readOnly} />
-                            </tr><br></br>
-                            <tr>Restaurant Name</tr>
-                            <tr>
-                                <input onChange={this.restaurantNameChangeHandler} value={this.state.restaurantName} type="text" class="form-control email" name="restaurantName" readOnly={this.state.readOnly} />
-                            </tr><br></br>
-                            <tr>Cuisine</tr>
-                            <tr>
-                                <input onChange={this.restaurantCuisineChangeHandler} value={this.state.restaurantCuisine} type="text" class="form-control email" name="restaurantCuisine" readOnly={this.state.readOnly} />
-                            </tr>
-                            <br></br>
-                            <tr>Restaurant Address</tr>
-                            <tr>
-                                <input onChange={this.restaurantAddressChangeHandler} value={this.state.restaurantAddress} type="text" class="form-control email" name="restaurantAddress" readOnly={this.state.readOnly} />
-                            </tr>
-                            <br></br>
-                            <tr>Restaurant Zip</tr>
-                            <tr>
-                                <input onChange={this.restaurantZipCodeChangeHandler} value={this.state.restaurantZipCode} type="number" class="form-control email" name="restaurantZipCode" readOnly={this.state.readOnly} />
-                            </tr>
+                    <div class="row" style={{ paddingBottom: '40px', paddingTop: '20px' }}>
+                        <a href="#" onClick={this.readOnlyHandler} class="btn btn-info btn-sm">
+                            <span class="glyphicon glyphicon-edit"></span> Edit </a>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row" style={{ paddingBottom: '0px', paddingTop: '10px' }}>
+                                <div class="col-md-12">First Name</div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+                                <div class="col-md-6"><input value={this.state.firstName} onChange={this.firstNameChangeHandler} type="text" class="form-control" name="firstName" readOnly={this.state.readOnly} /></div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '0px', paddingTop: '10px' }}>
+                                <div class="col-md-12">Last Name</div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+                                <div class="col-md-6"><input value={this.state.lastName} onChange={this.lastNameChangeHandler} type="text" class="form-control" name="lastName" readOnly={this.state.readOnly} /></div>
+                            </div>
+                            
+                            <div class="row" style={{ paddingBottom: '0px', paddingTop: '10px' }}>
+                                <div class="col-md-12">Email</div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+                                <div class="col-md-12"><input onChange={this.emailChangeHandler} value={this.state.email} type="text" class="form-control email" name="email" readOnly={this.state.readOnly} /></div>
+                            </div>
+
                         </div>
-                        <br></br><br></br>
-                        <tr><button type="button" onClick={this.updateHandler} class="btn btn-success btn-lg col-md-6">Update</button></tr>
-                    </table>
-                    <br></br>
-                    <br></br>
+                        <div class="col-md-6">
+                            <div class="col-md-6"><input type="file" onChange={this.pictureChangeHandler} name="myImage" class="custom-file-input" /></div>
+                            <div class="col-md-6">{uploadImage}</div>
+                            {image}
+                        </div>
+                    </div>
+                    <div class="row" style={{ paddingTop: '30px' }}>
+                        <div class="row" style={{paddingLeft:'250px'}}> <p><h2>Restaurant Information</h2></p></div>
+
+                        <div class="col-md-6">
+                            <div class="row" style={{ paddingBottom: '0px', paddingTop: '10px' }}>
+                                <div class="col-md-12">Restaurant Phone Number</div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+                                <div class="col-md-12"><input onChange={this.phoneChangeHandler} value={this.state.phone} type="text" class="form-control email" name="phone" readOnly={this.state.readOnly} /></div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '0px', paddingTop: '10px' }}>
+                                <div class="col-md-12">Restaurant Name</div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+                                <div class="col-md-12"><input onChange={this.restaurantNameChangeHandler} value={this.state.restaurantName} type="text" class="form-control email" name="restaurantName" readOnly={this.state.readOnly} /></div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '0px', paddingTop: '10px' }}>
+                                <div class="col-md-12">Cuisine</div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+                                <div class="col-md-12"><input onChange={this.restaurantCuisineChangeHandler} value={this.state.restaurantCuisine} type="text" class="form-control email" name="restaurantCuisine" readOnly={this.state.readOnly} /></div>
+                            </div>
+
+                            <div class="row" style={{ paddingBottom: '0px', paddingTop: '10px' }}>
+                                <div class="col-md-12">Restaurant Address</div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+                                <div class="col-md-12"><input onChange={this.restaurantAddressChangeHandler} value={this.state.restaurantAddress} type="text" class="form-control email" name="restaurantAddress" readOnly={this.state.readOnly} /></div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '0px', paddingTop: '10px' }}>
+                                <div class="col-md-12">Restaurant Zip</div>
+                            </div>
+                            <div class="row" style={{ paddingBottom: '10px', paddingTop: '10px' }}>
+                                <div class="col-md-12"><input onChange={this.restaurantZipCodeChangeHandler} value={this.state.restaurantZipCode} type="number" class="form-control email" name="restaurantZipCode" readOnly={this.state.readOnly} /></div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md-6"><input type="file" onChange={this.pictureChangeHandler2} name="myImage" class="custom-file-input" /></div>
+                            <div class="col-md-6">{uploadImage2}</div>
+                            {image2}
+                        </div>
+                    </div>
+                    <div class="row" style={{ paddingTop: '20px' }}>
+                        <button type="button" onClick={this.updateHandler} class="btn btn-success btn-lg col-md-6">Update</button>
+                    </div>
+
 
                     {messageDisplay}
                 </div>
@@ -262,7 +376,7 @@ class UpdateDetailsOwner extends Component {
             <div>
                 {redirectVar}
                 <div class="col-md-3"></div>
-                <div class="col-sm-3">{createDisplay}</div>
+                <div class="col-md-9">{createDisplay}</div>
             </div>
         )
     }

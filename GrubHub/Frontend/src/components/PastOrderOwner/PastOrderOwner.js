@@ -62,7 +62,7 @@ class PastOrderOwner extends Component {
             array.push(<div class="NoOrder"></div>)
         }
         this.state.orders.map((order) => {
-            if (order.orderStatus == "Delivered") {
+            if (order.orderStatus == "Delivered" || order.orderStatus == "Cancelled" ) {
                 var val = JSON.parse(order.orderDetails);
                 var array2 = []
 
@@ -120,6 +120,10 @@ class PastOrderOwner extends Component {
                 progressBar.push(<div class="progress-bar bg-danger" style={{ width: "20%" }}>Delivered</div>)
 
                 break;
+            case 'Cancelled':
+                        progressBar.push(<div class="progress-bar" style={{ width: "100%", backgroundColor: "red" }}>Order Cancelled</div>)
+        
+                        break;
         }
 
         return (

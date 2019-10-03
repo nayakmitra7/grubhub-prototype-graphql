@@ -17,6 +17,7 @@ class SearchPage extends Component {
             filterVal: "",
             detailsFlag: false,
             searchFlag:false,
+            restaurantImage:"",
             bag:localStorage.getItem(sessionStorage.getItem("username"))? JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))) :[],
 
         }
@@ -92,7 +93,7 @@ class SearchPage extends Component {
                 array.push(
                     <div class="row embossed-heavy " style={{ marginBottom: '0px', borderStyle: "groove", paddingTop: '20px', paddingBottom: '20px',backgroundColor:'white' }}>
                         <span class="border border-dark">
-                            <div class="col-md-3"><img></img></div>
+                            <div class="col-md-3"><img style={{ width: "80%" }} src={restaurant.restaurantImage}  class="rounded"/></div>
                             <div class="col-md-5">
                                 <div class="row" style={{ fontSize: "15px", fontWeight: "600", color: "blue" }}>
                                     <p onClick={this.showRestaurantDetails} id={restaurant.restaurantId}>{restaurant.restaurantName}</p></div>

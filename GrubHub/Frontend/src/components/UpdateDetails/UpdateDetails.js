@@ -13,8 +13,9 @@ class UpdateDetails extends Component {
             firstName: "",
             lastName: "",
             email: "",
-            pictures: [],
+            file: null,
             phone: "",
+            filePreview: null,
             errorMessage: [],
             authFlag: true,
             readOnly: true,
@@ -27,6 +28,10 @@ class UpdateDetails extends Component {
         this.emailChangeHandler = this.emailChangeHandler.bind(this);
         this.updateHandler = this.updateHandler.bind(this);
         this.readOnlyHandler = this.readOnlyHandler.bind(this);
+        this.pictureChangeHandler = this.pictureChangeHandler.bind(this)
+        this.resetPicture = this.resetPicture.bind(this)
+        this.uploadImageHandler = this.uploadImageHandler.bind(this)
+
     }
 
 
@@ -43,8 +48,13 @@ class UpdateDetails extends Component {
                         ID: response.data.buyerID,
                         address: response.data.buyerAddress
                     })
+                    axios.get("http://localhost:3001/photo/" + response.data.buyerID).then(responses => {
+                        console.log(responses.data.buyerImage)
+                        this.setState({
+                            file: responses.data.buyerImage
+                        })
+                    })
                 }
-
                 else if (response.status === 201) {
                     this.setState({
                         errorFlag: "Some error",
@@ -53,7 +63,37 @@ class UpdateDetails extends Component {
                 }
             });
     }
+    uploadImageHandler = (e) => {
+        if (this.state.file) {
+            e.preventDefault();
+            let formData = new FormData();
+            formData.append('myImage', this.state.file, this.state.ID);
+            const config = {
+                headers: {
+                    'content-type': 'multipart/form-data'
+                }
+            };
+            axios.post("/upload/photo", formData, config)
+                .then((response) => {
+                    alert("The file is successfully uploaded");
+                }).catch((error) => {
+                });
+        }
 
+    }
+    pictureChangeHandler(event) {
+        if (event.target.files[0]) {
+            this.setState({
+                file: event.target.files[0],
+                filePreview: URL.createObjectURL(event.target.files[0])
+            });
+        }
+
+    }
+    resetPicture(event) {
+        event.preventDefault();
+        this.setState({ file: null });
+    }
     firstNameChangeHandler = (e) => {
         this.setState({
             firstName: e.target.value
@@ -121,6 +161,9 @@ class UpdateDetails extends Component {
 
     render() {
         let redirectVar = null;
+        ////
+        let image = <div class="img" style={{ paddingTop: '20px' }}><img style={{ width: "80%" }} src="//placehold.it/5000x3000" class="img-circle" /></div>
+        let uploadImage = ""
         if (!cookie.load('cookie')) {
             redirectVar = <Redirect to="/login" />
         }
@@ -133,48 +176,52 @@ class UpdateDetails extends Component {
             messageDisplay = (<ul class="li alert alert-success">Successfully Updated !!!</ul>);
         }
 
+        if (this.state.filePreview) {
+            image = <div class="img" style={{ paddingBottom: '20px' }}><img style={{ width: "80%" }} src={this.state.filePreview} class="img-circle" onChange={this.pictureChangeHandler} /></div>
+            uploadImage = <button onClick={this.uploadImageHandler}>Upload Image</button>
+
+        } else if (this.state.file) {
+            image = <div class="img" style={{ paddingBottom: '20px' }}><img style={{ width: "80%" }} src={this.state.file} class="img-circle" onChange={this.pictureChangeHandler} /></div>
+        } 
         let createDisplay = (
             <div>
-                <table class="updateTable">
-                    <div class="form-group " >
-                        <br></br><br></br>
-                        <tr>
-                            <a href="#" onClick={this.readOnlyHandler} class="btn btn-info btn-sm">
-                                <span class="glyphicon glyphicon-edit"></span> Edit
-        </a>
-                        </tr>
-                        <br></br><br></br>
-                        <tr>
-                            <td class="">First Name </td>
-                            <td class="">Last Name</td>
-                        </tr>
-                        <tr>
-                            <td class="signup"><input value={this.state.firstName} onChange={this.firstNameChangeHandler} type="text" class="form-control" name="firstName" readOnly={this.state.readOnly} /></td>
-                            <td class="signup"><input value={this.state.lastName} onChange={this.lastNameChangeHandler} type="text" class="form-control" name="lastName" readOnly={this.state.readOnly} /></td>
-                        </tr>
-                        <br></br>
-                        <tr>
-                            Email
-            </tr>
-                        <tr>
-                            <input onChange={this.emailChangeHandler} value={this.state.email} type="text" class="form-control email" name="email" readOnly={this.state.readOnly} />
-                        </tr>
-                        <br></br>
-                        <tr>Phone</tr>
-                        <tr>
-                            <input onChange={this.phoneChangeHandler} value={this.state.phone} type="text" class="form-control email" name="phone" readOnly={this.state.readOnly} />
-                        </tr>
-                        <br></br>
-                        <tr>Address</tr>
-                        <tr>
-                            <input onChange={this.addressChangeHandler} value={this.state.address} type="text" class="form-control email" name="address" readOnly={this.state.readOnly} />
-                        </tr>
+
+                <div class="row" style={{ paddingBottom: '50px', paddingTop: '50px' }}>
+                    <a href="#" onClick={this.readOnlyHandler} class="btn btn-info btn-sm">
+                        <span class="glyphicon glyphicon-edit"></span> Edit</a>
+                </div>
+                <div class="row" style={{ paddingBottom: '10px' }}>
+                    <div class="col-md-6" style={{ paddingLeft: '50px' }}>
+                        <div class="col-md-6"><input type="file" onChange={this.pictureChangeHandler} name="myImage" class="custom-file-input" /></div>
+                        <div class="col-md-6">{uploadImage}</div>
+                        {image}
                     </div>
-                    <br></br><br></br>
-                    <tr><button type="button" onClick={this.updateHandler} class="btn btn-success btn-lg col-md-6">Update</button></tr>
-                </table>
-                <br></br>
-                <br></br>
+                </div>
+                <div class="row" style={{ paddingBottom: '0px' }}>
+                    <div class="row" style={{ paddingBottom: '10px' }}>
+                        <div class="col-md-4 signup">First Name</div>
+                        <div class="col-md-4 signup">Last Name</div>
+                    </div>
+                    <div class="row" style={{ paddingBottom: '10px' }}>
+                        <div class="col-md-4 signup">
+                            <input value={this.state.firstName} onChange={this.firstNameChangeHandler} type="text" class="form-control" name="firstName" readOnly={this.state.readOnly} />
+                        </div>
+                        <div class="col-md-4 signup"><input value={this.state.lastName} onChange={this.lastNameChangeHandler} type="text" class="form-control" name="lastName" readOnly={this.state.readOnly} /></div>
+                    </div>
+                </div>
+                <div class="row" style={{ paddingBottom: '10px' }}>
+                    <div class="col-md-6">
+                        <div class="row" style={{ paddingBottom: '10px' }}>Email</div>
+                        <div class="row" style={{ paddingBottom: '10px' }}><input onChange={this.emailChangeHandler} value={this.state.email} type="text" class="form-control email" name="email" readOnly={this.state.readOnly} /></div>
+                        <div class="row" style={{ paddingBottom: '10px' }}>Phone</div>
+                        <div class="row" style={{ paddingBottom: '10px' }}><input onChange={this.phoneChangeHandler} value={this.state.phone} type="text" class="form-control email" name="phone" readOnly={this.state.readOnly} />
+                        </div>
+                        <div class="row" style={{ paddingBottom: '10px' }}>Address</div>
+                        <div class="row" style={{ paddingBottom: '10px' }}><input onChange={this.addressChangeHandler} value={this.state.address} type="text" class="form-control email" name="address" readOnly={this.state.readOnly} /></div>
+                    </div>
+
+                </div>
+                <div class="row"><button type="button" onClick={this.updateHandler} class="btn btn-success btn-lg col-md-6">Update</button></div>
                 {messageDisplay}</div>
         )
 
@@ -185,8 +232,7 @@ class UpdateDetails extends Component {
                 <div class="row" >
                     <div class="col-md-4"></div>
 
-                    <div class="col-md-4">   {createDisplay}</div>
-                    <div class="col-md-4"></div>
+                    <div class="col-md-8">   {createDisplay}</div>
                 </div>
 
             </div>

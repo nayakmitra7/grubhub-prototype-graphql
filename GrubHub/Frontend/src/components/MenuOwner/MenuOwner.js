@@ -3,8 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
-import App from '../../App'
-import ReactDOM from 'react-dom';
+
 
 
 class MenuOwner extends Component {
@@ -29,6 +28,8 @@ class MenuOwner extends Component {
             itemPrice: "",
             itemSection: "",
             itemId: "",
+            filePreview:null,
+            file:null,
             itemForSection: [],
             itemsPresent: [],
             errorMessage: []
@@ -44,10 +45,17 @@ class MenuOwner extends Component {
         this.addItemHandler = this.addItemHandler.bind(this);
         this.fetchItemsforSection = this.fetchItemsforSection.bind(this);
         this.modalCloseSection = this.modalCloseSection.bind(this);
-
+        this.pictureChangeHandler=this.pictureChangeHandler.bind(this)
 
     }
-
+    pictureChangeHandler =(event)=>{
+        if(event.target.files[0]){
+            this.setState({
+                file: event.target.files[0],
+                filePreview: URL.createObjectURL(event.target.files[0])
+            });
+        }
+    }
     promiseGetSections = () => {
         return new Promise((resolve, reject) => {
 
@@ -68,7 +76,6 @@ class MenuOwner extends Component {
 
             axios.get('http://localhost:3001/items/' + this.state.restaurantId)
                 .then(response => {
-                    console.log("Status Code ss: ", response.data);
                     if (response.status === 200) {
                         this.setState({
                             itemsPresent: response.data
@@ -109,8 +116,23 @@ class MenuOwner extends Component {
                 this.setState({
                     errorFlag: "Success"
                 })
+                if(this.state.file && this.state.filePreview){
+                    let formData = new FormData();
+                    formData.append('myImage',this.state.file,this.state.itemId);
+                    const config = {
+                        headers: {
+                            'content-type': 'multipart/form-data'
+                        }
+                    };
+                    axios.post("/upload/ItemPhoto",formData,config)
+                        .then((response) => {
+
+                        }).catch((error) => {
+                    });
+                }
                 this.promiseGetItems();
                 this.modalClose();
+                window.location.reload()
             } else {
                 this.setState({
                     errorMessage: response.data,
@@ -165,9 +187,7 @@ class MenuOwner extends Component {
                     errorFlag: "Success"
                 })
                 this.promiseGetItems();
-
                 this.modalClose();
-
             } else {
                 this.setState({
                     errorMessage: response.data,
@@ -177,9 +197,10 @@ class MenuOwner extends Component {
         })
     }
     modalClose = () => {
-
+        document.getElementById("preview").value=null
         document.getElementById("modalItem").style.display = "none";
-        this.setState({ editItem: false, itemName: "", itemDesc: "", itemPrice: "", itemSection: "", addItem: false, errorFlag: "", errorMessage: [] });
+        
+        this.setState({ editItem: false, itemName: "", itemDesc: "", itemPrice: "", itemSection: "", addItem: false, errorFlag: "", errorMessage: [],filePreview:null });
     }
     modalCloseSection = (e) => {
 
@@ -206,7 +227,7 @@ class MenuOwner extends Component {
         document.getElementById("modalItem").style.display = "block";
         this.state.itemsPresent.filter((item) => {
             if (item.ItemId == e.target.id) {
-                this.setState({ itemName: item.ItemName, itemDesc: item.ItemDesc, itemPrice: item.ItemPrice, itemSection: item.SectionId, editItem: true, itemId: item.ItemId });
+                this.setState({ itemName: item.ItemName, itemDesc: item.ItemDesc, itemPrice: item.ItemPrice, itemSection: item.SectionId, editItem: true, itemId: item.ItemId ,file:item.itemImage});
             }
         })
 
@@ -237,24 +258,47 @@ class MenuOwner extends Component {
             }
         })
     }
+    promiseGetNewItemId =()=>{
+        axios.get('http://localhost:3001/maxItemId/'+this.state.restaurantId).then((response) => {
+            console.log(response.data)
+            if(this.state.file){
+                let formData = new FormData();
+                formData.append('myImage',this.state.file,response.data);
+                const config = {
+                    headers: {
+                        'content-type': 'multipart/form-data'
+                    }
+                };
+                axios.post("/upload/ItemPhoto",formData,config)
+                    .then((response) => {
+                        alert("The file is successfully uploaded");
+                    }).catch((error) => {
+                });
+            }
+
+        })
+    }
     addItemHandler = (e) => {
 
         e.preventDefault();
         axios.defaults.withCredentials = true;
         var data = { itemName: this.state.itemName, itemDesc: this.state.itemDesc, itemPrice: this.state.itemPrice, restaurantId: this.state.restaurantId, itemSection: this.state.itemSection }
-
         axios.post('http://localhost:3001/item', data).then((response) => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success",
                     errorMessage: []
                 })
-
+                if(this.state.file){
+                    this.promiseGetNewItemId();
+                }
+                
                 this.promiseGetItems();
                 this.promiseGetSections();
-            
+                
                 setTimeout(() => {
                     this.modalClose();
+                    window.location.reload();
                 }, 1000);
                 
                
@@ -320,6 +364,7 @@ class MenuOwner extends Component {
 
 
         var redirectVar = "";
+        var image="";
         if (!cookie.load('cookie')) {
             redirectVar = <Redirect to="/LoginOwner" />
         }
@@ -372,6 +417,16 @@ class MenuOwner extends Component {
                 <div class="col-md-4"><button type="button" onClick={this.updateItemHandler} class="btn btn-success btn-md">Update Item</button></div>
             </div>)
             ItemHeading = "Edit Item"
+            if(this.state.filePreview){
+                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage" id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "80%" }} src={this.state.filePreview}  class="rounded"/></div></div>)
+
+            }else if(this.state.file){
+                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage"id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "80%" }} src={this.state.file}  class="rounded"/></div></div>)
+
+            }else{
+                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage"id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "80%" }} src="//placehold.it/500x300"  class="rounded"/></div></div>)
+
+            }
         } else {
             buttonItem = (<div class="row">
                 <div class="col-md-3"></div>
@@ -381,6 +436,13 @@ class MenuOwner extends Component {
                 <div class="col-md-4"></div>
             </div>)
             ItemHeading = "Add Item"
+            if(this.state.filePreview){
+                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage" id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "80%" }} src={this.state.filePreview}  class="rounded"/></div></div>)
+
+            }else{
+                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage"id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "80%" }} src="//placehold.it/500x300"  class="rounded"/></div></div>)
+
+            }
         }
 
         if (this.state.sectionsPresent.length) {
@@ -388,8 +450,8 @@ class MenuOwner extends Component {
                 var flag = 0;
                 array.push(<div>
                     <div class="row" style={{ fontSize: "20px", fontWeight: "900" }}>
+                    <div class="col-md-1" style={{textAlign:'right'}}><span class="glyphicon glyphicon-pencil" id={section.menuSectionId} onClick={this.editSectionModal}></span> </div>
                         <div class="col-md-11" style={{ alignItems: "right" }}>{section.menuSectionName} </div>
-                        <div class="col-md-1"><span class="glyphicon glyphicon-pencil" id={section.menuSectionId} onClick={this.editSectionModal}></span> </div>
                     </div>
                     <br></br>
                 </div>)
@@ -398,15 +460,15 @@ class MenuOwner extends Component {
                     if (item.SectionId == section.menuSectionId) {
                         flag = 1;
                         array.push(
-                            <div class="row" style={{ marginBottom: '25px', borderStyle: "groove", paddingTop: '10px', paddingBottom: '10px' }}>
+                            <div class="row embossed-heavy" style={{ marginLeft: '10px', marginRight: '200px', marginBottom: '10px', paddingBottom: '10px', fontWeight: 'bold', backgroundColor: 'white',paddingTop:'10px' }}>
                                 <span class="border border-dark">
-                                    <div class="col-md-3"><img></img></div>
+                                    <div class="col-md-5"><img style={{ width: "80%" }} src={item.itemImage}  class="rounded"/></div>
                                     <div class="col-md-5">
                                         <div class="row" style={{ fontSize: "15px", fontWeight: "600", color: "blue" }}>
                                             <p onClick={this.editItemModal} id={item.ItemId}>{item.ItemName}</p></div>
                                         <div class="row">{item.ItemDesc}</div>
                                     </div>
-                                    <div class="col-md-3"></div>
+                                    <div class="col-md-1"></div>
                                     <div class="col-md-1">
                                         <div class="row" style={{ fontSize: "15px", fontWeight: "600" }}>Price</div>
                                         <div class="row">${item.ItemPrice}</div>
@@ -454,6 +516,7 @@ class MenuOwner extends Component {
 
                 }))
         }
+        
         return (
             <div>
                 {redirectVar}
@@ -510,10 +573,11 @@ class MenuOwner extends Component {
                                             <div class="row">Description</div>
                                             <div class="row signup" style={{ paddingBottom: "15px" }}><input value={this.state.itemDesc} onChange={this.itemDescChangeHandler} type="text" class="form-control" name="itemDesc" /></div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">Img</div>
-                                </div>
-                                <div class="row" style={{ paddingLeft: "25px" }}>
+                                    {/* </div> */}
+                                    {/* <div class="col-md-6">{image}</div> */}
+                                {/* </div> */}
+                                {/* <div class="row" style={{ paddingLeft: "25px" }}> */}
+                                <div class="row">
                                     <div class="row" style={{ paddingBottom: "5px" }}>
                                         Sections
                                 </div>
@@ -523,6 +587,11 @@ class MenuOwner extends Component {
                                             {addDropDown}
                                         </select>
                                     </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-6">{image}</div>
                                 </div>
                                 <div class="row" style={{ paddingLeft: "25px", paddingRight: "25px" }}>
                                     <div class="row" style={{ paddingBottom: "5px" }}>
