@@ -3,6 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import {Redirect} from 'react-router';
+import {address} from '../../constant'
 
 class LoginOwner extends Component{
     constructor(props){
@@ -33,7 +34,7 @@ class LoginOwner extends Component{
         })
     }
     fetchDetails = (username)=>{
-        axios.get('http://localhost:3001/DetailsOwner/'+username)
+        axios.get(address+'/DetailsOwner/'+username)
         .then(response => {
             if(response.status === 200){
                 sessionStorage.setItem("OwnerFirstName",response.data.ownerFirstName);
@@ -53,7 +54,7 @@ class LoginOwner extends Component{
         }
         this.fetchDetails(this.state.username);
         axios.defaults.withCredentials = true;
-        axios.post('http://localhost:3001/loginOwner',data)
+        axios.post(address+'/loginOwner',data)
             .then(response => {
                 console.log("Status Code : ",response.status);
                 if(response.status === 200){

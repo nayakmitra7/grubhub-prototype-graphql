@@ -3,8 +3,8 @@ import React, { Component } from 'react';
 import cookie from 'react-cookies';
 import axios from 'axios';
 import { Redirect } from 'react-router';
-import ImageUploader from 'react-images-upload';
-import Axios from 'axios';
+import {address} from '../../constant'
+
 
 
 class HomePage extends Component {
@@ -19,7 +19,7 @@ class HomePage extends Component {
        
     }
     componentDidMount=(e)=>{
-        axios.get('http://localhost:3001/Details/'+sessionStorage.getItem("username"))
+        axios.get(address+'/Details/'+sessionStorage.getItem("username"))
         .then(response => {
             if(response.status === 200){
                 sessionStorage.setItem("Address",response.data.buyerAddress);

@@ -3,6 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
+import {address} from '../../constant'
 
 
 
@@ -59,7 +60,7 @@ class MenuOwner extends Component {
     promiseGetSections = () => {
         return new Promise((resolve, reject) => {
 
-            axios.get('http://localhost:3001/section/' + this.state.restaurantId)
+            axios.get(address+'/section/' + this.state.restaurantId)
                 .then(response => {
                     if (response.status === 200) {
                         this.setState({
@@ -74,7 +75,7 @@ class MenuOwner extends Component {
     promiseGetItems = () => {
         return new Promise((resolve, reject) => {
 
-            axios.get('http://localhost:3001/items/' + this.state.restaurantId)
+            axios.get(address+'/items/' + this.state.restaurantId)
                 .then(response => {
                     if (response.status === 200) {
                         this.setState({
@@ -88,7 +89,7 @@ class MenuOwner extends Component {
     }
     promiseGetRestDetails = () => {
         return new Promise((resolve, reject) => {
-            axios.get('http://localhost:3001/DetailsOwner/' + sessionStorage.getItem("username"))
+            axios.get(address+'/DetailsOwner/' + sessionStorage.getItem("username"))
                 .then(response => {
                     if (response.status === 200) {
                         this.setState({
@@ -111,7 +112,7 @@ class MenuOwner extends Component {
     }
     updateItemHandler = (e) => {
         var data = { itemId: this.state.itemId, itemName: this.state.itemName, itemSection: this.state.itemSection, itemPrice: this.state.itemPrice, itemDesc: this.state.itemDesc, restaurantId: this.state.restaurantId }
-        axios.put("http://localhost:3001/items/", data).then(response => {
+        axios.put(address+"/items/", data).then(response => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success"
@@ -124,7 +125,7 @@ class MenuOwner extends Component {
                             'content-type': 'multipart/form-data'
                         }
                     };
-                    axios.post("/upload/ItemPhoto",formData,config)
+                    axios.post(address+"/upload/ItemPhoto",formData,config)
                         .then((response) => {
 
                         }).catch((error) => {
@@ -181,7 +182,7 @@ class MenuOwner extends Component {
     }
     deleteItemHandler = () => {
 
-        axios.delete("http://localhost:3001/items/" + this.state.itemId).then(response => {
+        axios.delete(address+"/items/" + this.state.itemId).then(response => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success"
@@ -240,7 +241,7 @@ class MenuOwner extends Component {
     updateSectionHandler = (e) => {
         var data = { menuSectionName: this.state.sectionName, menuSectionDesc: this.state.sectionDesc, menuSectionId: this.state.sectionId }
         console.log(data)
-        axios.put("http://localhost:3001/sections/", data).then(response => {
+        axios.put(address+"/sections/", data).then(response => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success"
@@ -259,7 +260,7 @@ class MenuOwner extends Component {
         })
     }
     promiseGetNewItemId =()=>{
-        axios.get('http://localhost:3001/maxItemId/'+this.state.restaurantId).then((response) => {
+        axios.get(address+'/maxItemId/'+this.state.restaurantId).then((response) => {
             console.log(response.data)
             if(this.state.file){
                 let formData = new FormData();
@@ -269,7 +270,7 @@ class MenuOwner extends Component {
                         'content-type': 'multipart/form-data'
                     }
                 };
-                axios.post("/upload/ItemPhoto",formData,config)
+                axios.post(address+"/upload/ItemPhoto",formData,config)
                     .then((response) => {
                         alert("The file is successfully uploaded");
                     }).catch((error) => {
@@ -283,7 +284,7 @@ class MenuOwner extends Component {
         e.preventDefault();
         axios.defaults.withCredentials = true;
         var data = { itemName: this.state.itemName, itemDesc: this.state.itemDesc, itemPrice: this.state.itemPrice, restaurantId: this.state.restaurantId, itemSection: this.state.itemSection }
-        axios.post('http://localhost:3001/item', data).then((response) => {
+        axios.post(address+'/item', data).then((response) => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success",
@@ -317,7 +318,7 @@ class MenuOwner extends Component {
     addSectionHandler = (e) => {
         axios.defaults.withCredentials = true;
         var data = { sectionName: this.state.sectionName, sectionDesc: this.state.sectionDesc, restaurantId: this.state.restaurantId }
-        axios.post('http://localhost:3001/section', data).then((response) => {
+        axios.post(address+'/section', data).then((response) => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success",
@@ -342,7 +343,7 @@ class MenuOwner extends Component {
     }
 
     deleteItemPlusSection=(e)=>{
-        axios.delete("http://localhost:3001/sections/" + this.state.sectionId).then(response => {
+        axios.delete(address+"/sections/" + this.state.sectionId).then(response => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success"

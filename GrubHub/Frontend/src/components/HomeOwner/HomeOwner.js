@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
 import axios from 'axios';
+import {address} from '../../constant'
 
 class HomeOwner extends Component {
   constructor(props) {
@@ -25,7 +26,7 @@ class HomeOwner extends Component {
 
   }
   componentDidMount() {
-    axios.get('http://localhost:3001/OrdersOwnerNew/' + sessionStorage.getItem("RestaurantId"))
+    axios.get(address+'/OrdersOwnerNew/' + sessionStorage.getItem("RestaurantId"))
       .then(response => {
         if (response.status === 200) {
           this.setState({ orders: response.data })
@@ -50,7 +51,7 @@ class HomeOwner extends Component {
       data={status:"Delivered",id:this.state.orderId}
       orders=this.readyOrders
     }
-    axios.post('http://localhost:3001/statusChange',data)
+    axios.post(address+'/statusChange',data)
       .then(response => {
         if (response.status === 200) {
           this.modalClose();
@@ -60,7 +61,7 @@ class HomeOwner extends Component {
       });
   }
   cancelledOrders = (e) => {
-    axios.get('http://localhost:3001/OrdersOwnerCancelled/' + sessionStorage.getItem("RestaurantId"))
+    axios.get(address+'/OrdersOwnerCancelled/' + sessionStorage.getItem("RestaurantId"))
       .then(response => {
         if (response.status === 200) {
           this.setState({ orders: response.data })
@@ -71,7 +72,7 @@ class HomeOwner extends Component {
   }
   cancelOrder = (e) => {
     var data = { id: e.target.id }
-    axios.post('http://localhost:3001/CancelOrder/', data)
+    axios.post(address+'/CancelOrder/', data)
       .then(response => {
         if (response.status === 200) {
           this.modalClose();
@@ -81,7 +82,7 @@ class HomeOwner extends Component {
       });
   }
   newOrders = (e) => {
-    axios.get('http://localhost:3001/OrdersOwnerNew/' + sessionStorage.getItem("RestaurantId"))
+    axios.get(address+'/OrdersOwnerNew/' + sessionStorage.getItem("RestaurantId"))
       .then(response => {
         if (response.status === 200) {
           this.setState({ orders: response.data })
@@ -91,7 +92,7 @@ class HomeOwner extends Component {
     this.setState({ Confirmed: "", New: "active", Preparing: "", Ready: "", Cancelled: "", titleName: "New Orders" })
   }
   confirmedOrders = (e) => {
-    axios.get('http://localhost:3001/OrdersOwnerConfirmed/' + sessionStorage.getItem("RestaurantId"))
+    axios.get(address+'/OrdersOwnerConfirmed/' + sessionStorage.getItem("RestaurantId"))
       .then(response => {
         if (response.status === 200) {
           this.setState({ orders: response.data })
@@ -101,7 +102,7 @@ class HomeOwner extends Component {
     this.setState({ Confirmed: "active", New: "", Preparing: "", Ready: "", Cancelled: "", titleName: "Confirmed Orders" })
   }
   preparingOrders = (e) => {
-    axios.get('http://localhost:3001/OrdersOwnerPreparing/' + sessionStorage.getItem("RestaurantId"))
+    axios.get(address+'/OrdersOwnerPreparing/' + sessionStorage.getItem("RestaurantId"))
       .then(response => {
         if (response.status === 200) {
           this.setState({ orders: response.data })
@@ -111,7 +112,7 @@ class HomeOwner extends Component {
     this.setState({ Confirmed: "", New: "", Preparing: "active", Ready: "", Cancelled: "", titleName: "Preparing" })
   }
   readyOrders = (e) => {
-    axios.get('http://localhost:3001/OrdersOwnerReady/' + sessionStorage.getItem("RestaurantId"))
+    axios.get(address+'/OrdersOwnerReady/' + sessionStorage.getItem("RestaurantId"))
       .then(response => {
         if (response.status === 200) {
           this.setState({ orders: response.data })

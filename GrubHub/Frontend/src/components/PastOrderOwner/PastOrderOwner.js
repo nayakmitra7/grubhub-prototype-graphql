@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
 import axios from 'axios';
+import {address} from '../../constant'
 
 class PastOrderOwner extends Component {
     constructor(props) {
@@ -20,7 +21,7 @@ class PastOrderOwner extends Component {
     }
     componentDidMount() {
         console.log(sessionStorage.getItem("RestaurantId"))
-        axios.get('http://localhost:3001/OrdersOwner/' + sessionStorage.getItem("RestaurantId"))
+        axios.get(address+'/OrdersOwner/' + sessionStorage.getItem("RestaurantId"))
             .then(response => {
                 if (response.status === 200) {
                     this.setState({ orders: response.data })

@@ -3,6 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
+import { address } from '../../constant';
 
 class signup extends Component {
     constructor() {
@@ -54,7 +55,7 @@ class signup extends Component {
         axios.defaults.withCredentials = true;
 
         var data = { firstName: this.state.firstName, lastName: this.state.lastName, password: this.state.password, email: this.state.email, address: this.state.address }
-        axios.post("http://localhost:3001/signup", data)
+        axios.post(address+"/signup", data)
             .then((response) => {
                 sessionStorage.setItem("username",this.state.email)
                 sessionStorage.setItem("FirstName",this.state.firstName)

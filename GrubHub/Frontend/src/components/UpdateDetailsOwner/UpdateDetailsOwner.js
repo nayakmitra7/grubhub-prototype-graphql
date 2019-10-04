@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import cookie from 'react-cookies';
 import axios from 'axios';
 import { Redirect } from 'react-router';
-import ImageUploader from 'react-images-upload';
-import Axios from 'axios';
+import {address} from '../../constant'
+
 
 
 
@@ -49,7 +49,7 @@ class UpdateDetailsOwner extends Component {
     componentDidMount() {
         var data = ""
         console.log(sessionStorage.getItem("username"))
-        Axios.get('http://localhost:3001/DetailsOwner/' + sessionStorage.getItem("username"))
+        axios.get(address+'/DetailsOwner/' + sessionStorage.getItem("username"))
             .then(response => {
 
                 console.log("Status Code : ", response.status);
@@ -63,7 +63,7 @@ class UpdateDetailsOwner extends Component {
                         ownerId: response.data.ownerId,
                         restaurantId: response.data.restaurantId
                     })
-                    axios.get("http://localhost:3001/owner/image/" + response.data.ownerId).then(responses => {
+                    axios.get(address+"/owner/image/" + response.data.ownerId).then(responses => {
                         this.setState({
                             file: responses.data.ownerImage
                         })
@@ -77,8 +77,8 @@ class UpdateDetailsOwner extends Component {
             }).then(() => {
                 if (this.state.restaurantId) {
                     data = this.state.restaurantId;
-                    axios.get('http://localhost:3001/DetailsRestaurant/' + data).then((responses) => {
-                        axios.get("http://localhost:3001/restaurant/image/" + this.state.restaurantId).then(responses => {
+                    axios.get(address+'/DetailsRestaurant/' + data).then((responses) => {
+                        axios.get(address+"/restaurant/image/" + this.state.restaurantId).then(responses => {
                             this.setState({
                                 file2: responses.data.restaurantImage
                             })
@@ -104,7 +104,7 @@ class UpdateDetailsOwner extends Component {
                     'content-type': 'multipart/form-data'
                 }
             };
-            axios.post("/owner/image", formData, config)
+            axios.post(address+"/owner/image", formData, config)
                 .then((response) => {
                     alert("The file is successfully uploaded");
                 }).catch((error) => {
@@ -122,7 +122,7 @@ class UpdateDetailsOwner extends Component {
                     'content-type': 'multipart/form-data'
                 }
             };
-            axios.post("/restaurant/image", formData, config)
+            axios.post(address+"/restaurant/image", formData, config)
                 .then((response) => {
                     alert("The file is successfully uploaded");
                 }).catch((error) => {
@@ -198,7 +198,7 @@ class UpdateDetailsOwner extends Component {
         const data = { firstName: this.state.firstName, lastName: this.state.lastName, email: this.state.email, phone: this.state.phone, ownerId: this.state.ownerId, restaurantId: this.state.restaurantId, restaurantName: this.state.restaurantName, restaurantAddress: this.state.restaurantAddress, restaurantCuisine: this.state.restaurantCuisine, restaurantZipCode: this.state.restaurantZipCode };
 
         return new Promise((resolve, reject) => {
-            Axios.post('http://localhost:3001/UpdateOwner', data)
+            axios.post(address+'/UpdateOwner', data)
                 .then(response => {
                     if (response.status === 201) {
                         console.log(response.data);
@@ -221,7 +221,7 @@ class UpdateDetailsOwner extends Component {
 
         if (this.state.readOnly == false) {
             this.promise1().then(() => {
-                Axios.post('http://localhost:3001/UpdateRestaurant', restData)
+                axios.post(address+'/UpdateRestaurant', restData)
                     .then(response => {
                         sessionStorage.setItem("OwnerFirstName", this.state.firstName)
 
@@ -312,7 +312,7 @@ class UpdateDetailsOwner extends Component {
 
                         </div>
                         <div class="col-md-6">
-                            <div class="col-md-6"><input type="file" onChange={this.pictureChangeHandler} name="myImage" class="custom-file-input" /></div>
+                            <div class="col-md-6"><input type="file" onChange={this.pictureChangeHandler} name="" class="custom-file-input" /></div>
                             <div class="col-md-6">{uploadImage}</div>
                             {image}
                         </div>

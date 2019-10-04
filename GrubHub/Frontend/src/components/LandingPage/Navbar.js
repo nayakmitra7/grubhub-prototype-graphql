@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import cookie from 'react-cookies';
-import axios from 'axios';
 
 
 class Navbar extends Component {
@@ -50,7 +48,7 @@ class Navbar extends Component {
 
           </div>
           <div class="row">
-            <div class="col-md-6">Update Details</div>
+            <div class="col-md-6">Profile</div>
             <div class="col-md-6">Edit Menu</div>
           </div>
           <li role="presentation" class="divider" ></li>
@@ -58,15 +56,7 @@ class Navbar extends Component {
 
         </ul>
       </div>);
-      /* menuIcon =(<div class="dropdown">
-       <button style={{marginTop:"20px"}} class="glyphicon glyphicon-th-list" type="button" data-toggle="dropdown">
-       <span class="caret"></span></button>
-       <ul class="dropdown-menu">
-         <li><a href="/HomeOwner">Home</a></li>
-         <li><a href="/MenuOwner">Menu</a></li>
-         <li><a href="/UpdateDetailsOwner">Update Personal Details</a></li>
-       </ul>
-     </div>);*/
+ 
       // eslint-disable-next-line no-restricted-globals
     } else if (location.pathname.endsWith("/UpdateDetails") || location.pathname.endsWith("/HomePage") || location.pathname.endsWith("/SearchPage") || location.pathname.endsWith("/DetailsPage") || location.pathname.endsWith("/ReviewPage") || location.pathname.endsWith("/UpcomingOrder") || location.pathname.endsWith("/PastOrder")) {
       grubHub = (<a class="navbar-brand" href="/login">GRUBHUB</a>);

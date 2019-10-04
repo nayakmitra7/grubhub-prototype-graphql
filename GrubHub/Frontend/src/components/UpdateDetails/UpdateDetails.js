@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Redirect } from 'react-router';
 import ImageUploader from 'react-images-upload';
 import Axios from 'axios';
+import { address } from '../../constant';
 
 
 class UpdateDetails extends Component {
@@ -36,7 +37,7 @@ class UpdateDetails extends Component {
 
 
     componentDidMount() {
-        axios.get('http://localhost:3001/Details/' + sessionStorage.getItem("username"))
+        axios.get(address+'/Details/' + sessionStorage.getItem("username"))
             .then(response => {
                 if (response.status === 200) {
                     this.setState({
@@ -48,7 +49,7 @@ class UpdateDetails extends Component {
                         ID: response.data.buyerID,
                         address: response.data.buyerAddress
                     })
-                    axios.get("http://localhost:3001/photo/" + response.data.buyerID).then(responses => {
+                    axios.get(address+"/photo/" + response.data.buyerID).then(responses => {
                         console.log(responses.data.buyerImage)
                         this.setState({
                             file: responses.data.buyerImage
@@ -73,7 +74,7 @@ class UpdateDetails extends Component {
                     'content-type': 'multipart/form-data'
                 }
             };
-            axios.post("/upload/photo", formData, config)
+            axios.post(address+"/upload/photo", formData, config)
                 .then((response) => {
                     alert("The file is successfully uploaded");
                 }).catch((error) => {
@@ -131,7 +132,7 @@ class UpdateDetails extends Component {
         axios.defaults.withCredentials = true;
 
         if (this.state.readOnly == false) {
-            axios.post('http://localhost:3001/updateBuyer', data)
+            axios.post(address+'/updateBuyer', data)
                 .then(response => {
                     console.log("Status Code : ", response.status);
                     if (response.status === 200) {

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
 import axios from 'axios';
+import { address } from '../../constant';
 
 class UpcomingOrder extends Component {
     constructor(props) {
@@ -18,7 +19,7 @@ class UpcomingOrder extends Component {
 
     }
     componentDidMount() {
-        axios.get('http://localhost:3001/UpcomingOrders/' + sessionStorage.getItem("BuyerId"))
+        axios.get(address+'/UpcomingOrders/' + sessionStorage.getItem("BuyerId"))
             .then(response => {
                 if (response.status === 200) {
                     this.setState({ orders: response.data })

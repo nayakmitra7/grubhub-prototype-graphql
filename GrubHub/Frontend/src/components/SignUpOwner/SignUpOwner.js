@@ -3,6 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
+import { address } from '../../constant';
 
 
 class SignUpOwner extends Component {
@@ -70,7 +71,7 @@ class SignUpOwner extends Component {
         e.preventDefault();
         axios.defaults.withCredentials = true;
         var data = { firstName: this.state.firstName, lastName: this.state.lastName, phone: this.state.phone, email: this.state.email, restaurant: this.state.restaurant, zipcode: this.state.zipCode, password: this.state.password }
-        axios.post("http://localhost:3001/SignUpOwner", data)
+        axios.post(address+"/SignUpOwner", data)
             .then((response) => {
                 if (response.status === 200) {
                     sessionStorage.setItem("OwnerFirstName",this.state.firstName)

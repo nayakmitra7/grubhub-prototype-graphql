@@ -3,6 +3,7 @@ import '../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
+import {address} from '../../constant'
 
 
 
@@ -45,7 +46,7 @@ class DetailsPage extends Component {
         var time = today.getHours() + ":" + today.getMinutes();
         var CurrentDateTime = date + ' ' + time
         var data = { restaurantId: this.state.restaurantId, buyerID: sessionStorage.getItem("BuyerId"), buyerAddress: sessionStorage.getItem("Address"), orderStatus: "New", bag: localStorage.getItem(sessionStorage.getItem("username")), date: CurrentDateTime }
-        axios.post('http://localhost:3001/Order', data)
+        axios.post(address+'/Order', data)
             .then(response => {
                 if (response.status === 200) {
                     this.setState({ bag: [] })
@@ -152,7 +153,7 @@ class DetailsPage extends Component {
     promiseGetSections = () => {
         return new Promise((resolve, reject) => {
 
-            axios.get('http://localhost:3001/section/' + this.state.restaurantId)
+            axios.get(address+'/section/' + this.state.restaurantId)
                 .then(response => {
                     if (response.status === 200) {
                         this.setState({
@@ -167,7 +168,7 @@ class DetailsPage extends Component {
     promiseGetItems = () => {
         return new Promise((resolve, reject) => {
 
-            axios.get('http://localhost:3001/items/' + this.state.restaurantId)
+            axios.get(address+'/items/' + this.state.restaurantId)
                 .then(response => {
                     if (response.status === 200) {
                         this.setState({
