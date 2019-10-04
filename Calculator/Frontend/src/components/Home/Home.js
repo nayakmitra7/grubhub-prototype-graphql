@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import '../../App.css';
 import axios from 'axios';
-
+import {address}  from '../../constant'
 
 class Home extends Component {
     constructor(){
@@ -64,7 +64,7 @@ class Home extends Component {
     }
     submitHandler=(e) =>{
         var data = {sign:this.state.sign, firstVal :this.state.firstVal, secondVal:this.state.secondVal}
-        axios.post('http://localhost:3001/home',data)
+        axios.post(address+'/home',data)
                  .then((response) => {
                      if(response.status===201){
                         this.setState({
