@@ -61,7 +61,7 @@ class HomePage extends Component {
                     <div class="col-md-3"></div>
                     <div class="col-md-6">
                         <div class="col-md-1"></div>
-                        <div class="col-md-7 "><input onChange ={this.itemSearchedChangeHandler}style={{ height: '50px',width:'450px',fontSize:'20px' }} type="text" placeholder="What are you looking for?"></input></div>
+                        <div class="col-md-7 "><input onChange ={this.itemSearchedChangeHandler}style={{ height: '50px',width:'100%',fontSize:'20px' }} type="text" placeholder="What are you looking for?"></input></div>
                         <div class="col-md-4" style={{paddingBottom:"200px", }}><button class="btn btn-lg" style={{backgroundColor:"rgb(0, 112, 235)",color:"white"}} onClick ={this.serachFood} >Find Food</button></div>
                     </div>
                     <div class="col-md-3"></div>

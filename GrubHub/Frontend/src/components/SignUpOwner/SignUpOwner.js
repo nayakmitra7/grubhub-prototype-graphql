@@ -100,13 +100,12 @@ class SignUpOwner extends Component {
         let displayMessage = null;
         if (this.state.authFlag == false) {
             displayMessage = (this.state.errorMessage.map((error) => {
-                return (<li class="li alert-danger">{error.msg}</li>)
+                return (<div class="li alert-danger">{error.msg}</div>)
             }))
         }
         return (
             <div class="backgroundImgRest">
                 {redirectVar}
-                {displayMessage}
                 <div class="container">
                     <div class="login-form">
                         <div class="main-div">
@@ -145,9 +144,12 @@ class SignUpOwner extends Component {
                             </table>
 
                         </div>
+                       
 
                     </div>
                 </div>
+                <div class="row" style={{paddingBottom:'20px',paddingLeft:'30px'}}>{displayMessage}</div>
+                
             </div>
         )
     }

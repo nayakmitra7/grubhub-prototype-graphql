@@ -209,9 +209,7 @@ class SetUpOwner extends Component {
                         <div class="form-group" >
                             <br></br><br></br>
                             <tr>
-                                <a href="#" onClick={this.readOnlyHandler} class="btn btn-info btn-sm">
-                                    <span class="glyphicon glyphicon-edit"></span> Edit
-        </a>
+                                
                             </tr>
                             <br></br><br></br>
                             <tr>

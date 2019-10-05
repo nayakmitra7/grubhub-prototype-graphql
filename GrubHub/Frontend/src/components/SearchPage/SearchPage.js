@@ -112,7 +112,21 @@ class SearchPage extends Component {
             array = [];
             this.state.restaurantsServingItem.map((restaurant) => {
                 if (restaurant.restaurantCuisine == this.state.filterVal) {
-                    array.push(<div class="row " style={{ marginBottom: '25px', borderStyle: "groove", paddingTop: '10px', paddingBottom: '10px' }}>
+                    array.push(
+                        <div class="row embossed-heavy " style={{ marginBottom: '0px', borderStyle: "groove", paddingTop: '20px', paddingBottom: '20px',backgroundColor:'white' }}>
+                            <span class="border border-dark">
+                                <div class="col-md-3"><img style={{ width: "80%" }} src={restaurant.restaurantImage}  class="rounded"/></div>
+                                <div class="col-md-5">
+                                    <div class="row" style={{ fontSize: "15px", fontWeight: "600", color: "blue" }}>
+                                        <p onClick={this.showRestaurantDetails} id={restaurant.restaurantId}>{restaurant.restaurantName}</p></div>
+                                    <div class="row">{restaurant.restaurantCuisine}</div>
+                                </div>
+                                <div class="col-md-4"></div>
+    
+    
+                                <br></br>
+                            </span><br></br></div>)
+                   /* array.push(<div class="row " style={{ marginBottom: '25px', borderStyle: "groove", paddingTop: '10px', paddingBottom: '10px' }}>
                         <span class="border border-dark">
                             <div class="col-md-3"><img></img></div>
                             <div class="col-md-5">
@@ -124,7 +138,7 @@ class SearchPage extends Component {
 
 
                             <br></br>
-                        </span><br></br></div>)
+                    </span><br></br></div>)*/
                 }
 
             })
@@ -144,7 +158,7 @@ class SearchPage extends Component {
             var set1 = new Set();
             set1.add(<li class="li" onClick={this.filterView}>None</li>)
             this.state.restaurantsServingItem.forEach((item) => {
-                set1.add(<div class="row" id={item.restaurantCuisine} onClick={this.filterView} style={{backgroundColor:"white"}}>{item.restaurantCuisine}</div>)
+                set1.add(<li class="li"><div id={item.restaurantCuisine} onClick={this.filterView} style={{backgroundColor:""}}>{item.restaurantCuisine}</div></li>)
             })
             filterBy = set1;
         }

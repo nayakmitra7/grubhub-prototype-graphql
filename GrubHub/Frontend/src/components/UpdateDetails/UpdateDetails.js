@@ -162,7 +162,6 @@ class UpdateDetails extends Component {
 
     render() {
         let redirectVar = null;
-        ////
         let image = <div class="img" style={{ paddingTop: '20px' }}><img style={{ width: "80%" }} src="//placehold.it/5000x3000" class="img-circle" /></div>
         let uploadImage = ""
         if (!cookie.load('cookie')) {

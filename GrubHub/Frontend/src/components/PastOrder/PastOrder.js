@@ -74,6 +74,11 @@ class PastOrder extends Component {
                 })
 
                 array.push(<div class="row embossed-heavy" style={{ marginLeft: '100px', marginRight: '140px', marginBottom: '10px', paddingBottom: '10px', fontWeight: 'bold', backgroundColor: 'white' }}>
+                     <div class="row" style={{backgroundColor:'#f2f2f2',marginLeft:'0px',marginRight:'0px'}}>
+                        <div class="col-md-2" style={{paddingRight:'0px'}}><h5>Order Date :</h5></div>
+                        <div class="col-md-2" style={{paddingLeft:'0px'}}><h5>{order.orderDate}</h5></div>
+                        <div class="col-md-9">  </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-8"><p style={{ fontSize: '20px', marginLeft: '10px', marginTop: '10px' }}>{order.restaurantName}</p></div>
                         <div class="col-md-1"><button class="btn " id={order.orderId} style={{ backgroundColor: 'blue', color: 'white', fontSize: '16px', marginTop: '15px' }} onClick={this.trackOrder}>Order Details</button></div>

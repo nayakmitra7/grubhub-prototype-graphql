@@ -9,14 +9,13 @@ const { check, validationResult } = require('express-validator');
 var pool = require('./Base.js');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-
-
+const address = "http://localhost:"
 var cors = require('cors');
 app.set('view engine', 'ejs');
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: address + '3000', credentials: true }));
 
-app.use('/uploads',express.static('uploads'))
+app.use('/uploads', express.static('uploads'))
 
 app.use(session({
     secret: 'cmpe273_kafka_passport_mongo',
@@ -32,7 +31,7 @@ app.use(session({
 app.use(bodyParser.json());
 
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Origin', address + '3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
@@ -46,7 +45,7 @@ var storage = multer.diskStorage({
         cb(null, 'uploads');
     },
     filename: function (req, file, cb) {
-        var filename = "profileImage"+file.originalname+".jpeg";
+        var filename = "profileImage" + file.originalname + ".jpeg";
         cb(null, filename);
     }
 });
@@ -57,7 +56,7 @@ var storage2 = multer.diskStorage({
         cb(null, 'uploads');
     },
     filename: function (req, file, cb) {
-        var filename = "itemImage"+file.originalname+".jpeg";
+        var filename = "itemImage" + file.originalname + ".jpeg";
         cb(null, filename);
     }
 });
@@ -68,7 +67,7 @@ var storage3 = multer.diskStorage({
         cb(null, 'uploads');
     },
     filename: function (req, file, cb) {
-        var filename = "ownerImage"+file.originalname+".jpeg";
+        var filename = "ownerImage" + file.originalname + ".jpeg";
         cb(null, filename);
     }
 });
@@ -79,35 +78,33 @@ var storage4 = multer.diskStorage({
         cb(null, 'uploads');
     },
     filename: function (req, file, cb) {
-        var filename = "restaurantImage"+file.originalname+".jpeg";
+        var filename = "restaurantImage" + file.originalname + ".jpeg";
         cb(null, filename);
     }
 });
 var upload4 = multer({ storage: storage4 });
 
-app.post('/restaurant/image', upload4.single('myImage'), function(req, res, next){
-    var message=[]
-    console.log("Hi")
-    var data = "http://localhost:3001/uploads/restaurantImage"+req.file.originalname +".jpeg"
-    var query = 'update restaurant set restaurantImage="' + data+'"  where restaurantId="' + req.file.originalname+ '"'
-    console.log(query)
-        pool.query(query, function (err, result, fields) {
-            if (err) {
-                res.writeHead(201, {
-                    'Content-Type': 'text/plain'
-                });
-                errors = { msg: "Something went wrong" }
-                message.push(errors);
-                res.end(JSON.stringify(message));
-            } else {
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-                res.end("Success");
-            }
-        })
+app.post('/restaurant/image', upload4.single('myImage'), function (req, res, next) {
+    var message = []
+    var data = "uploads/restaurantImage" + req.file.originalname + ".jpeg"
+    var query = 'update restaurant set restaurantImage="' + data + '"  where restaurantId="' + req.file.originalname + '"'
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end("Success");
+        }
+    })
 });
-app.get('/restaurant/image/(:data)',function(req, res, next){
+app.get('/restaurant/image/(:data)', function (req, res, next) {
     var query = 'Select restaurantImage from restaurant where restaurantId="' + req.params.data + '"'
     pool.query(query, function (err, result, fields) {
         if (err) {
@@ -121,37 +118,43 @@ app.get('/restaurant/image/(:data)',function(req, res, next){
             res.writeHead(200, {
                 'Content-Type': 'text/plain'
             });
-            res.end(JSON.stringify(result[0]));
+            if (JSON.parse(JSON.stringify(result[0])).restaurantImage != null) {
+                var imageAddress = address + "3001/" + JSON.parse(JSON.stringify(result[0])).restaurantImage;
+                var image = { "restaurantImage": imageAddress }
+                res.end(JSON.stringify(image));
+            } else {
+                res.end(JSON.stringify(result));
+
+            }
+
         }
     })
 
 })
 
 
-
-app.post('/owner/image', upload3.single('myImage'), function(req, res, next){
-    var message=[]
-    console.log("Hi")
-    var data = "http://localhost:3001/uploads/ownerImage"+req.file.originalname +".jpeg"
-    var query = 'update owner set ownerImage="' + data+'"  where ownerId="' + req.file.originalname+ '"'
+app.post('/owner/image', upload3.single('myImage'), function (req, res, next) {
+    var message = []
+    var data = "uploads/ownerImage" + req.file.originalname + ".jpeg"
+    var query = 'update owner set ownerImage="' + data + '"  where ownerId="' + req.file.originalname + '"'
     console.log(query)
-        pool.query(query, function (err, result, fields) {
-            if (err) {
-                res.writeHead(201, {
-                    'Content-Type': 'text/plain'
-                });
-                errors = { msg: "Something went wrong" }
-                message.push(errors);
-                res.end(JSON.stringify(message));
-            } else {
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-                res.end("Success");
-            }
-        })
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end("Success");
+        }
+    })
 });
-app.get('/owner/image/(:data)',function(req, res, next){
+app.get('/owner/image/(:data)', function (req, res, next) {
     var query = 'Select ownerImage from owner where ownerId="' + req.params.data + '"'
     pool.query(query, function (err, result, fields) {
         if (err) {
@@ -165,52 +168,59 @@ app.get('/owner/image/(:data)',function(req, res, next){
             res.writeHead(200, {
                 'Content-Type': 'text/plain'
             });
-            res.end(JSON.stringify(result[0]));
+            if (JSON.parse(JSON.stringify(result[0])).ownerImage != null) {
+                var imageAddress = address + "3001/" + JSON.parse(JSON.stringify(result[0])).ownerImage;
+                var image = { "ownerImage": imageAddress }
+                res.end(JSON.stringify(image))
+            } else {
+                res.end(JSON.stringify(result))
+            }
+
         }
     })
 
 })
-app.post('/upload/ItemPhoto', upload2.single('myImage'), function(req, res, next){
-    var message=[]
-    var data = "http://localhost:3001/uploads/itemImage"+req.file.originalname +".jpeg"
-    var query = 'update menuItems set itemImage="' + data+'"  where itemId="' + req.file.originalname+ '"'
-        pool.query(query, function (err, result, fields) {
-            if (err) {
-                res.writeHead(201, {
-                    'Content-Type': 'text/plain'
-                });
-                errors = { msg: "Something went wrong" }
-                message.push(errors);
-                res.end(JSON.stringify(message));
-            } else {
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-                res.end("Success");
-            }
-        })
+app.post('/upload/ItemPhoto', upload2.single('myImage'), function (req, res, next) {
+    var message = []
+    var data = "uploads/itemImage" + req.file.originalname + ".jpeg"
+    var query = 'update menuItems set itemImage="' + data + '"  where itemId="' + req.file.originalname + '"'
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end("Success");
+        }
+    })
 });
-app.post('/upload/photo', upload.single('myImage'), function(req, res, next){
-    var message=[]
-    var data = "http://localhost:3001/uploads/profileImage"+req.file.originalname +".jpeg"
-    var query = 'update buyer set buyerImage="' + data+'"  where buyerID="' + req.file.originalname+ '"'
-        pool.query(query, function (err, result, fields) {
-            if (err) {
-                res.writeHead(201, {
-                    'Content-Type': 'text/plain'
-                });
-                errors = { msg: "Something went wrong" }
-                message.push(errors);
-                res.end(JSON.stringify(message));
-            } else {
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-                res.end("Success");
-            }
-        })
+app.post('/upload/photo', upload.single('myImage'), function (req, res, next) {
+    var message = []
+    var data = "uploads/profileImage" + req.file.originalname + ".jpeg"
+    var query = 'update buyer set buyerImage="' + data + '"  where buyerID="' + req.file.originalname + '"'
+    pool.query(query, function (err, result, fields) {
+        if (err) {
+            res.writeHead(201, {
+                'Content-Type': 'text/plain'
+            });
+            errors = { msg: "Something went wrong" }
+            message.push(errors);
+            res.end(JSON.stringify(message));
+        } else {
+            res.writeHead(200, {
+                'Content-Type': 'text/plain'
+            });
+            res.end("Success");
+        }
+    })
 });
-app.get('/photo/(:data)',function(req, res, next){
+app.get('/photo/(:data)', function (req, res, next) {
     var query = 'Select buyerImage from buyer where buyerID="' + req.params.data + '"'
     pool.query(query, function (err, result, fields) {
         if (err) {
@@ -224,7 +234,14 @@ app.get('/photo/(:data)',function(req, res, next){
             res.writeHead(200, {
                 'Content-Type': 'text/plain'
             });
-            res.end(JSON.stringify(result[0]));
+            if (JSON.parse(JSON.stringify(result[0])).buyerImage != null) {
+                var imageAddress = address + "3001/" + JSON.parse(JSON.stringify(result[0])).buyerImage;
+                var image = { "buyerImage": imageAddress }
+                res.end(JSON.stringify(image))
+            } else {
+                res.end(JSON.stringify(result))
+            }
+
         }
     })
 
@@ -425,8 +442,7 @@ app.post('/SignUpOwner',
     check("email", "Wrong E-Mail format.").isEmail(),
     check("password", "Password length needs to be 8 or more.").isLength({ min: 8 }),
     check("restaurant", "Restaurant Name is needed.").not().isEmpty(),
-    check("zipcode", "Zipcode is needed.").not().isEmpty(),
-
+    check("restaurantZipCode", "Restaurant ZipCode is Invalid.").isLength({ min: 5, max: 5 })
     ], function (req, res, next) {
         var message = validationResult(req).errors;
         if (message.length > 0) {
@@ -680,8 +696,8 @@ app.post('/item',
     check("itemPrice", "Item Price is needed.").not().isEmpty(),
     check("itemSection", "Item Section is needed.").not().isEmpty()]
     , function (req, res, next) {
-   
-       var query = 'Insert into menuItems (ItemName,ItemPrice,ItemDesc,SectionId,restaurantId) values ("' + req.body.itemName + '","' + req.body.itemPrice + '","' + req.body.itemDesc + '","' + req.body.itemSection + '","' + req.body.restaurantId + '")'
+
+        var query = 'Insert into menuItems (ItemName,ItemPrice,ItemDesc,SectionId,restaurantId) values ("' + req.body.itemName + '","' + req.body.itemPrice + '","' + req.body.itemDesc + '","' + req.body.itemSection + '","' + req.body.restaurantId + '")'
         var message = validationResult(req).errors;
         if (message.length > 0) {
             res.writeHead(201, {
@@ -721,7 +737,16 @@ app.get('/items/(:data)', function (req, res, next) {
             res.writeHead(200, {
                 'Content-Type': 'text/plain'
             });
-            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+            var modifiedResult = [];
+            JSON.parse(JSON.stringify(result)).forEach(item => {
+                if (item.itemImage != null) {
+                    item.itemImage = address + "3001/" + item.itemImage;
+                    modifiedResult.push(item);
+                } else {
+                    modifiedResult.push(item);
+                }
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(modifiedResult))));
         }
     })
 })
@@ -855,7 +880,16 @@ app.get('/RestaurantSearched/(:data)', function (req, res, next) {
             res.writeHead(200, {
                 'Content-Type': 'text/plain'
             });
-            res.end(JSON.stringify(JSON.parse(JSON.stringify(result))));
+            var modifiedResult = [];
+            JSON.parse(JSON.stringify(result)).forEach(restaurant => {
+                if (restaurant.restaurantImage != null) {
+                    restaurant.restaurantImage = address + "3001/" + restaurant.restaurantImage;
+                    modifiedResult.push(restaurant);
+                } else {
+                    modifiedResult.push(restaurant);
+                }
+            });
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(modifiedResult))));
         }
     })
 })
@@ -1106,7 +1140,7 @@ app.get('/maxItemId/(:data)', function (req, res, next) {
             res.writeHead(200, {
                 'Content-Type': 'text/plain'
             });
-            res.end(JSON.stringify(JSON.parse(JSON.stringify(result[0])).val) )
+            res.end(JSON.stringify(JSON.parse(JSON.stringify(result[0])).val))
         }
     })
 })

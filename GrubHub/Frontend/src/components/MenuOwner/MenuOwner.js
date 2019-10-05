@@ -272,7 +272,6 @@ class MenuOwner extends Component {
                 };
                 axios.post(address+"/upload/ItemPhoto",formData,config)
                     .then((response) => {
-                        alert("The file is successfully uploaded");
                     }).catch((error) => {
                 });
             }
@@ -651,7 +650,7 @@ class MenuOwner extends Component {
 
                             <div class="modal-footer">
                                 {buttonSection}
-                                <div class="row">
+                                <div class="row" style={{ marginTop: "20px" }}>
                                     {messageDisplay}
 
                                 </div>
