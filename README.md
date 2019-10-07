@@ -22,10 +22,10 @@ Open the constant.js folder present in the path GrubHub/frontend/src<br>
 Change the address variable to required value<br>
 
 Change the same in index.js file of Backend folder<br><br>
-To make connections to the database:<br>
+## Setting the My-SQL database:<br>
 Import the sql table to database from the folder sqlDump.<br>
 Add your database details to the Base.js present in Backend folder.<br>
-Start your mysql server
+Start the mysql server
 ### To run the client
 In the terminal open the frontend folder present in Grubhub application.<br>Run the command npm install.<br>Then run npm start.<br><br>
 
