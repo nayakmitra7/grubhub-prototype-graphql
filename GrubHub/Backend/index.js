@@ -7,10 +7,13 @@ const multer = require('multer');
 var cookieParser = require('cookie-parser');
 const { check, validationResult } = require('express-validator');
 var pool = require('./Base.js');
+
+
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const address = "http://localhost:"
 var cors = require('cors');
+var message=[];
 app.set('view engine', 'ejs');
 
 app.use(cors({ origin: address + '3000', credentials: true }));
@@ -137,7 +140,6 @@ app.post('/owner/image', upload3.single('myImage'), function (req, res, next) {
     var message = []
     var data = "uploads/ownerImage" + req.file.originalname + ".jpeg"
     var query = 'update owner set ownerImage="' + data + '"  where ownerId="' + req.file.originalname + '"'
-    console.log(query)
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {
@@ -255,8 +257,7 @@ app.post('/login', [check("username", "Please fill in the User Name.").not().isE
         });
         res.end(JSON.stringify(message));
     } else {
-
-        pool.query('SELECT buyerPassword FROM buyer where buyerEmail ="' + req.body.username + '"', function (err, result, fields) {
+       pool.query('SELECT buyerPassword FROM buyer where buyerEmail ="' + req.body.username + '"', function (err, result, fields) {
             if (err) {
                 res.writeHead(201, {
                     'Content-Type': 'text/plain'
@@ -415,9 +416,12 @@ var doInsertion = (req) => {
                                         var query4 = 'delete from restaurant where restaurantId =' + restId;
                                         pool.query(query4, function (err, result, fields) {
                                             return reject();
+
                                         })
+
                                         return reject();
                                     } else {
+
                                         return resolve();
                                     }
                                 })
@@ -438,11 +442,11 @@ var doInsertion = (req) => {
 app.post('/SignUpOwner',
     [check("firstName", "First Name is needed.").not().isEmpty(),
     check("lastName", "Last Name is needed.").not().isEmpty(),
-    check("phone", "Invalid phone number.").isLength({ min: 10 }),
+    check("phone", "Invalid phone number.").isLength({ min: 10, max:10 }),
     check("email", "Wrong E-Mail format.").isEmail(),
     check("password", "Password length needs to be 8 or more.").isLength({ min: 8 }),
     check("restaurant", "Restaurant Name is needed.").not().isEmpty(),
-    check("restaurantZipCode", "Restaurant ZipCode is Invalid.").isLength({ min: 5, max: 5 })
+    check("zipcode", "Restaurant ZipCode is Invalid.").isLength({ min: 5, max: 5 })
     ], function (req, res, next) {
         var message = validationResult(req).errors;
         if (message.length > 0) {
@@ -507,9 +511,12 @@ app.get('/DetailsOwner/(:data)', function (req, res, next) {
         }
     })
 })
+
 app.get('/DetailsRestaurant/(:data)', function (req, res, next) {
     var query = 'Select restaurantName,restaurantCuisine,restaurantAddress,restaurantZipCode from restaurant where restaurantId="' + req.params.data + '"'
+   
     pool.query(query, function (err, result, fields) {
+     
         if (err) {
             res.writeHead(201, {
                 'Content-Type': 'text/plain'
@@ -522,12 +529,14 @@ app.get('/DetailsRestaurant/(:data)', function (req, res, next) {
                 'Content-Type': 'text/plain'
             });
             res.end(JSON.stringify(result[0]));
+            console.log(JSON.stringify(result[0]))
         }
     })
+    
 })
 app.post('/updateBuyer', [check("firstName", "First Name is needed.").not().isEmpty(),
 check("lastName", "Last Name is needed.").not().isEmpty(),
-check("phone", "Invalid phone number.").isLength({ min: 10 }),
+check("phone", "Invalid phone number.").isLength({ min: 10,max:10 }),
 check("email", "Wrong E-Mail format.").isEmail(), check("address", "Address is needed.").not().isEmpty()],
     function (req, res, next) {
         var query = 'update buyer set buyerFirstName="' + req.body.firstName + '",buyerLastName="' + req.body.lastName + '",buyerEmail ="' + req.body.email + '",buyerPhone="' + req.body.phone + '",buyerAddress="' + req.body.address + '"  where buyerID="' + req.body.ID + '"'
@@ -559,7 +568,7 @@ check("email", "Wrong E-Mail format.").isEmail(), check("address", "Address is n
     })
 app.post('/UpdateOwner', [check("firstName", "First Name is needed.").not().isEmpty(),
 check("lastName", "Last Name is needed.").not().isEmpty(),
-check("phone", "Invalid phone number.").isLength({ min: 10 }),
+check("phone", "Invalid phone number.").isLength({ min: 10, max:10 }),
 check("email", "Wrong E-Mail format.").isEmail(),
 check("restaurantAddress", "Restaurant Address is needed.").not().isEmpty(),
 check("restaurantName", "Restaurant Name is needed.").not().isEmpty(),
@@ -942,7 +951,6 @@ app.get('/OrdersOwner/(:data)', function (req, res, next) {
     var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where (orderStatus="Delivered" or orderStatus="Cancelled") and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
     pool.query(query, function (err, result, fields) {
         if (err) {
-            console.log(err)
             res.writeHead(201, {
                 'Content-Type': 'text/plain'
             });
@@ -962,7 +970,6 @@ app.get('/OrdersOwnerNew/(:data)', function (req, res, next) {
     var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="New" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
     pool.query(query, function (err, result, fields) {
         if (err) {
-            console.log(err)
             res.writeHead(201, {
                 'Content-Type': 'text/plain'
             });
@@ -982,7 +989,6 @@ app.get('/OrdersOwnerConfirmed/(:data)', function (req, res, next) {
     var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="Confirmed" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
     pool.query(query, function (err, result, fields) {
         if (err) {
-            console.log(err)
             res.writeHead(201, {
                 'Content-Type': 'text/plain'
             });
@@ -1002,7 +1008,6 @@ app.get('/OrdersOwnerPreparing/(:data)', function (req, res, next) {
     var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="Preparing" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
     pool.query(query, function (err, result, fields) {
         if (err) {
-            console.log(err)
             res.writeHead(201, {
                 'Content-Type': 'text/plain'
             });
@@ -1022,7 +1027,6 @@ app.get('/OrdersOwnerReady/(:data)', function (req, res, next) {
     var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="Ready" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
     pool.query(query, function (err, result, fields) {
         if (err) {
-            console.log(err)
             res.writeHead(201, {
                 'Content-Type': 'text/plain'
             });
@@ -1042,7 +1046,6 @@ app.get('/OrdersOwnerCancelled/(:data)', function (req, res, next) {
     var query = 'select orderId,order.restaurantId,order.buyerId,order.buyerAddress,orderStatus,orderDetails,orderDate,buyerFirstName,buyerLastName from sys.order,sys.buyer where orderStatus="Cancelled" and order.buyerId=buyer.buyerID and order.restaurantId =' + req.params.data
     pool.query(query, function (err, result, fields) {
         if (err) {
-            console.log(err)
             res.writeHead(201, {
                 'Content-Type': 'text/plain'
             });
@@ -1061,14 +1064,12 @@ app.post('/CancelOrder',
     function (req, res, next) {
 
         var query = 'update sys.order set orderStatus="Cancelled" where orderId=' + req.body.id
-        console.log(query)
         pool.query(query, function (err, result, fields) {
             if (err) {
                 res.writeHead(201, {
                     'Content-Type': 'text/plain'
                 });
                 errors = { msg: "Something went wrong" }
-                console.log(err)
                 message.push(errors);
                 res.end(JSON.stringify(message));
             } else {
@@ -1084,14 +1085,12 @@ app.post('/CancelOrder',
 app.post('/statusChange',
     function (req, res, next) {
         var query = 'update sys.order set orderStatus="' + req.body.status + '" where orderId=' + req.body.id
-        console.log(query)
         pool.query(query, function (err, result, fields) {
             if (err) {
                 res.writeHead(201, {
                     'Content-Type': 'text/plain'
                 });
                 errors = { msg: "Something went wrong" }
-                console.log(err)
                 message.push(errors);
                 res.end(JSON.stringify(message));
             } else {
@@ -1127,7 +1126,6 @@ app.get('/PastOrders/(:data)', function (req, res, next) {
 app.get('/maxItemId/(:data)', function (req, res, next) {
     var message = [];
     var query = 'Select max(ItemId) as val from sys.menuItems where restaurantId =' + req.params.data
-    console.log(query)
     pool.query(query, function (err, result, fields) {
         if (err) {
             res.writeHead(201, {

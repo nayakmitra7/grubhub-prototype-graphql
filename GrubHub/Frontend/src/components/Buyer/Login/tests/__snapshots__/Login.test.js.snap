@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render correctly Login component 1`] = `
+<div>
+  
+  <div
+    class="backgroundImg"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="login-form"
+      >
+        <div
+          class="main-div"
+        >
+          <div
+            class="panel"
+          >
+            <h2
+              class="heading"
+            >
+               Sign in with your Grubhub account
+            </h2>
+          </div>
+          <div
+            class="form-group"
+          >
+            <p>
+              Email
+            </p>
+            <input
+              class="form-control"
+              name="username"
+              onChange={[Function]}
+              type="text"
+            />
+          </div>
+          <div
+            class="form-group"
+          >
+            <p>
+              Password
+            </p>
+            <input
+              class="form-control"
+              name="password"
+              onChange={[Function]}
+              type="password"
+            />
+          </div>
+          <br />
+          <button
+            class="btn btn-danger"
+            onClick={[Function]}
+          >
+            Sign-In
+          </button>
+          <br />
+          <br />
+          <br />
+          <br />
+          <a
+            class="createAcc"
+            href="/signup"
+          >
+            Create your account
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

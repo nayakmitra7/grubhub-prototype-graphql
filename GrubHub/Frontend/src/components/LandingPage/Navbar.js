@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import cookie from 'react-cookies';
+import '../../App.css';
 
 
 class Navbar extends Component {
@@ -14,9 +15,7 @@ class Navbar extends Component {
   handleLogout = () => {
     cookie.remove('cookie', { path: '/' })
   }
-  componentDidUpdate(){
-    console.log("hi")
-  }
+
   render() {
     let menuIcon = null;
     let grubHub = null;

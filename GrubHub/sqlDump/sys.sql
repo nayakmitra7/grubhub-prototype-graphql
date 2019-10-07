@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 8.0.17, for macos10.14 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.17, for osx10.12 (x86_64)
 --
 -- Host: localhost    Database: sys
 -- ------------------------------------------------------
@@ -33,7 +33,7 @@ CREATE TABLE `buyer` (
   `buyerAddress` varchar(450) DEFAULT NULL,
   PRIMARY KEY (`buyerID`),
   UNIQUE KEY `buyerEmail_UNIQUE` (`buyerEmail`)
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,7 +42,7 @@ CREATE TABLE `buyer` (
 
 LOCK TABLES `buyer` WRITE;
 /*!40000 ALTER TABLE `buyer` DISABLE KEYS */;
-INSERT INTO `buyer` VALUES (16,'Gunakara','Nayak','nayakmitra8@gmail.com','mahalasaa','9999999999',NULL,''),(20,'abcd','defg','aniruddha.mallya@gmail.com','$2b$10$n7duLZ4.KLxXBmUUbUw2huh1ihaMvdbiGVTbOgbZL6UU9TCUlEACC',NULL,NULL,''),(21,'John','Snow','john.snow@gmail.com','$2b$10$WCmBZqnW9Mck5U65nECLUOxqf8Ag.XH42UXeYq5WADzL0CklRiu3C','7896543120','http://localhost:3001/uploads/profileImage21.jpeg','1516 crest view avenue,belmont'),(22,'monica','geller','monica.gellar@gmail.com','$2b$10$qLkrdI.NOk44reheiDH6IuJ8JlFaUoUIS/t.5sm4wEU8r/6kwmVG.','9876543210','http://localhost:3001/uploads/22.jpeg','1516 vista club circle, apt no 102'),(38,'blah','nlah','blah@blah.com','$2b$10$zZZaun8HSM0AkJSnRNdAVuHW7WUuEPuhaVB6hEYvcFc33hAHnhpuq',NULL,NULL,'1516 vista club circle\napt no 102'),(39,'blake','blah','kaliyan@bullah.com','$2b$10$Fr0FwkLJHCFE97NUlQtB8ONKZ7ljT4ZNY78cIrj/rRTjPqsTw4pxi','7411183313',NULL,'1516');
+INSERT INTO `buyer` VALUES (40,'Mitra','Nayak','nayakmitra7@gmail.com','$2b$10$/EiAy9rWPInWreieJfh3vePJqzcp89ggYvvmDB5oQoqRpOZbSqAI6',NULL,'uploads/profileImage40.jpeg','1516 vista club circle\napt no 102'),(41,'Mohan','Nayak','mohan.nayak@gmail.com','$2b$10$NvFl1IjGzMBSGWwEi0EZS.Jsri8GmYiGBaQG77OmZY2wN092h7O7q','9876543252','uploads/profileImage41.jpeg','15 vista club circle\napt 10');
 /*!40000 ALTER TABLE `buyer` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -457,7 +457,7 @@ CREATE TABLE `menuItems` (
   `itemImage` varchar(450) DEFAULT NULL,
   PRIMARY KEY (`ItemId`),
   UNIQUE KEY `Item_unique` (`ItemName`,`SectionId`,`ItemPrice`,`ItemDesc`,`restaurantId`)
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -466,7 +466,7 @@ CREATE TABLE `menuItems` (
 
 LOCK TABLES `menuItems` WRITE;
 /*!40000 ALTER TABLE `menuItems` DISABLE KEYS */;
-INSERT INTO `menuItems` VALUES (24,'Idli',22,5.95,'steamed rice cakes served with mint chutney and vegetable curry',22,NULL),(26,'Fried Rice',24,25.00,'Description',22,NULL),(29,'Gulab Jamun',26,8.45,'Fried donut balls',22,NULL),(33,'Mixed veggie',30,5.95,'All vegetables are added like mushroom,onion',23,'http://localhost:3001/uploads/itemImage33.jpeg'),(34,'Alfredo Pasta',32,24.98,'Creamy rich white cheese sauce with home made Pasta',23,'http://localhost:3001/uploads/itemImage34.jpeg'),(35,'Tea',28,2.25,'Chai',22,'http://localhost:3001/uploads/itemImage35.jpeg'),(37,'Lassi',28,4.25,'Sweetened Yogurt churned over night and seasoned with spices',22,'http://localhost:3001/uploads/itemImage37.jpeg'),(38,'Noodles',24,12.89,'Stir fried flat noodles with vegetables and chicken and some beaten eggs',22,'http://localhost:3001/uploads/itemImage38.jpeg'),(40,'Idli Manchurain',35,30.00,'chinese styled idli in different chinese sauce',25,NULL),(41,'Idli chilli',35,32.00,'Spicy version of idli manchurian',25,NULL),(42,'Pasta Ravioli',37,23.50,'French styled pasta in indian sauces',25,NULL),(45,'Dosa',22,22.00,'',22,'http://localhost:3001/uploads/itemImage45.jpeg'),(48,'Masala Dosa',22,11.00,'',22,NULL),(52,'gffsfsfe',31,1.00,'yummy',23,'http://localhost:3001/uploads/itemImage52.jpeg');
+INSERT INTO `menuItems` VALUES (53,'Green Slush',40,22.00,'Refreshing blend of cucumber,lemon and pineapple',44,'uploads/itemImage53.jpeg'),(54,'Pinacolada',40,6.00,'Refreshing blend of Pineapple juice and coconut milk with a hint of lemon ',44,'uploads/itemImage54.jpeg'),(55,'Coke',40,4.00,'The classic',44,'uploads/itemImage55.jpeg'),(56,'Mango smoothie',40,9.00,'Mango and milk blend',44,'uploads/itemImage56.jpeg'),(57,'Watermelon Twister',40,9.00,'Watermelon juice with infused mint leaves',44,'uploads/itemImage57.jpeg'),(58,'Paneer Capsicum Pizza',39,18.00,'Cottage cheese and olive oil tossed capsicum on a garlic sauce',44,'uploads/itemImage58.jpeg'),(59,'Pepperoni Pizza',39,19.00,'Italian pepperoni on a robust red sauce',44,'uploads/itemImage59.jpeg'),(60,'Nigerian pizza',39,17.50,'A rather unique but wonderful combination of banana and mushrooms ',44,'uploads/itemImage60.jpeg'),(61,'Meatball Pizza',39,25.00,'Hand tossed pizza with robust red sauce and meatball topping',44,'uploads/itemImage61.jpeg'),(62,'5 Cheese Pizza',39,22.50,'Blend of 5 cheeses like Gouda, feta, parmesan, mozzarella and cheddar',44,'uploads/itemImage62.jpeg'),(63,'Carribean Passion',43,8.00,'Blend of strawberry and peach',45,'uploads/itemImage63.jpeg'),(64,'Grape Juice',43,11.00,'Freshly prepared grape Juice',45,'uploads/itemImage64.jpeg'),(65,'Orange Juice',43,8.50,'Freshly Squeezed orange Juice served with or without pulp',45,'uploads/itemImage65.jpeg'),(66,'Fanta',43,5.00,'Cherry Flavoured',45,'uploads/itemImage66.jpeg'),(67,'Mountain Dew',43,6.00,'',45,'uploads/itemImage67.jpeg'),(68,'Veggie Pizza',42,22.00,'Hand tossed pizza with red sauce and vegetables on top',45,'uploads/itemImage68.jpeg'),(69,'Chicken Satay Pizza',42,25.00,'Thin crust pizza with marinara sauce and satay chicken, capsicum, onion topping',45,'uploads/itemImage69.jpeg'),(70,'Pizza mac and cheese',42,30.00,'Thin crust pizza base with mac and cheese topping',45,'uploads/itemImage70.jpeg'),(71,'Grilled pizza',42,29.00,'Grilled pizza with feta cheese, basil and marinara sauce',45,'uploads/itemImage71.jpeg'),(72,'Chicken Pesto Pasta',41,35.00,'Chicken in Pesto sauce and spagetti pasta',45,'uploads/itemImage72.jpeg'),(73,'Louisiana Pasta',41,40.00,'Pasta and chicken tossed in tasty pink sauce',45,'uploads/itemImage73.jpeg'),(74,'Shrimp Parmesan Pasta',41,40.00,'Shrimp in butter garlic sauce with red sauce',45,'uploads/itemImage74.jpeg'),(75,'Pumpkin spice pasta',41,27.00,'Penne pasta in spicy pumpkin sauce ',45,'uploads/itemImage75.jpeg');
 /*!40000 ALTER TABLE `menuItems` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -483,7 +483,7 @@ CREATE TABLE `menuSection` (
   `menuSectionDesc` varchar(45) DEFAULT NULL,
   `restaurantId` varchar(45) NOT NULL,
   PRIMARY KEY (`menuSectionId`)
-) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -492,7 +492,7 @@ CREATE TABLE `menuSection` (
 
 LOCK TABLES `menuSection` WRITE;
 /*!40000 ALTER TABLE `menuSection` DISABLE KEYS */;
-INSERT INTO `menuSection` VALUES (22,'Breakfast','','22'),(24,'Dinner','','22'),(26,'Dessert','Sweets to eat','22'),(28,'Beverage','Drinks and lemonade','22'),(30,'omlette','Egg and vegetables','23'),(31,'Sandwich','','23'),(32,'Pastas','','23'),(35,'Breakfast','','25'),(36,'Lunch','','25'),(37,'Dinner','','25');
+INSERT INTO `menuSection` VALUES (39,'Speciality Pizza','','44'),(40,'Beverages','','44'),(41,'Pasta','','45'),(42,'Pizza','','45'),(43,'Beverages','','45');
 /*!40000 ALTER TABLE `menuSection` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -527,7 +527,7 @@ CREATE TABLE `order` (
   `orderDetails` mediumtext,
   `orderDate` varchar(450) DEFAULT NULL,
   PRIMARY KEY (`orderId`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -536,7 +536,7 @@ CREATE TABLE `order` (
 
 LOCK TABLES `order` WRITE;
 /*!40000 ALTER TABLE `order` DISABLE KEYS */;
-INSERT INTO `order` VALUES (13,22,21,'1516 crest view avenue,belmont','Cancelled','[{\"itemId\":\"40\",\"itemName\":\"Idli Manchurain\",\"itemCostTotal\":60,\"itemCount\":2,\"restaurantId\":\"25\"},{\"itemId\":\"42\",\"itemName\":\"Pasta Ravioli\",\"itemCostTotal\":70.5,\"itemCount\":3,\"restaurantId\":\"25\"}]','2019-9-27 14:23'),(14,22,21,'1516 crest view avenue,belmont','Delivered','[{\"itemId\":\"37\",\"itemName\":\"Lassi\",\"itemCostTotal\":4.25,\"itemCount\":1,\"restaurantId\":\"22\"}]','2019-9-27 15:23'),(15,22,21,'1516 crest view avenue,belmont','Preparing','[{\"itemId\":\"37\",\"itemName\":\"Lassi\",\"itemCostTotal\":8.5,\"itemCount\":2,\"restaurantId\":\"22\"}]','2019-9-27 16:23'),(16,25,21,'1516 crest view avenue,belmont','Delivered','[{\"itemId\":\"41\",\"itemName\":\"Idli chilli\",\"itemCostTotal\":32,\"itemCount\":1,\"restaurantId\":\"25\"},{\"itemId\":\"40\",\"itemName\":\"Idli Manchurain\",\"itemCostTotal\":120,\"itemCount\":4,\"restaurantId\":\"25\"},{\"itemId\":\"42\",\"itemName\":\"Pasta Ravioli\",\"itemCostTotal\":23.5,\"itemCount\":1,\"restaurantId\":\"25\"}]','2019-9-27 17:23'),(17,25,21,'1516 crest view avenue,belmont','Delivered','[{\"itemId\":\"42\",\"itemName\":\"Pasta Ravioli\",\"itemCostTotal\":23.5,\"itemCount\":1,\"restaurantId\":\"25\"}]','2019-9-27 18:23'),(18,22,21,'1516 crest view avenue,belmont','Delivered','[{\"itemId\":\"37\",\"itemName\":\"Lassi\",\"itemCostTotal\":4.25,\"itemCount\":1,\"restaurantId\":\"22\"},{\"itemId\":\"35\",\"itemName\":\"Tea\",\"itemCostTotal\":2.25,\"itemCount\":1,\"restaurantId\":\"22\"},{\"itemId\":\"24\",\"itemName\":\"Idli\",\"itemCostTotal\":17.85,\"itemCount\":3,\"restaurantId\":\"22\"},{\"itemId\":\"29\",\"itemName\":\"Gulab Jamun\",\"itemCostTotal\":8.45,\"itemCount\":1,\"restaurantId\":\"22\"}]','2019-9-29 17:26'),(19,23,21,'1516 crest view avenue,belmont','Cancelled','[{\"itemId\":\"33\",\"itemName\":\"Mixed veggie\",\"itemCostTotal\":17.85,\"itemCount\":3,\"restaurantId\":\"23\"},{\"itemId\":\"34\",\"itemName\":\"Alfredo Pasta\",\"itemCostTotal\":99.92,\"itemCount\":4,\"restaurantId\":\"23\"}]','2019-9-29 17:30'),(20,25,38,'1516 vista club circle\napt no 102','Cancelled','[{\"itemId\":\"41\",\"itemName\":\"Idli chilli\",\"itemCostTotal\":64,\"itemCount\":2,\"restaurantId\":\"25\"},{\"itemId\":\"40\",\"itemName\":\"Idli Manchurain\",\"itemCostTotal\":30,\"itemCount\":1,\"restaurantId\":\"25\"}]','2019-9-30 18:24'),(21,22,39,'1516','Delivered','[{\"itemId\":\"37\",\"itemName\":\"Lassi\",\"itemCostTotal\":4.25,\"itemCount\":1,\"restaurantId\":\"22\"},{\"itemId\":\"35\",\"itemName\":\"Tea\",\"itemCostTotal\":2.25,\"itemCount\":1,\"restaurantId\":\"22\"}]','2019-10-2 0:12');
+INSERT INTO `order` VALUES (22,44,40,'1516 vista club circle\napt no 102','Preparing','[{\"itemId\":\"53\",\"itemName\":\"Green Slush\",\"itemCostTotal\":22,\"itemCount\":1,\"restaurantId\":\"44\"},{\"itemId\":\"58\",\"itemName\":\"Paneer Capsicum Pizza\",\"itemCostTotal\":18,\"itemCount\":1,\"restaurantId\":\"44\"}]','2019-10-6 19:44'),(23,45,41,'15 vista club circle\napt 10','New','[{\"itemId\":\"74\",\"itemName\":\"Shrimp Parmesan Pasta\",\"itemCostTotal\":40,\"itemCount\":1,\"restaurantId\":\"45\"},{\"itemId\":\"75\",\"itemName\":\"Pumpkin spice pasta\",\"itemCostTotal\":27,\"itemCount\":1,\"restaurantId\":\"45\"}]','2019-10-6 19:45');
 /*!40000 ALTER TABLE `order` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -584,7 +584,7 @@ CREATE TABLE `owner` (
   `restaurantId` int(11) NOT NULL,
   PRIMARY KEY (`ownerId`),
   UNIQUE KEY `ownerEmail_UNIQUE` (`ownerEmail`)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -593,7 +593,7 @@ CREATE TABLE `owner` (
 
 LOCK TABLES `owner` WRITE;
 /*!40000 ALTER TABLE `owner` DISABLE KEYS */;
-INSERT INTO `owner` VALUES (22,'John','Snow','john.snow@gmail.com','$2b$10$k08Rz1zyzTFu4Zk9QY5peuxNJeACx2/XBkcNkXjOPUpdKxYQQPXJS','http://localhost:3001/uploads/ownerImage22.jpeg','9999999999',23),(23,'Mitra','Naya','nayakmitra7@gmail.com','$2b$10$CR5zerFDTNLwfRcMCgdAlOtU6bLlnznGlW.VslueufA2CWcA.8umO','http://localhost:3001/uploads/ownerImage23.jpeg','7411183313',22),(24,'barry','More','barry.more@gmail.com','$2b$10$zvJ0Upwu.kicjSM0bpEmWuLPCezPdQwj.GowlkuYHmB5A.CcmuZFC',NULL,'8888888888',25),(25,'ross','geller','ross.geller@gmail.com','$2b$10$sHIWC07BHZW0SGYFoivd7uVbLhHoBWs.33PHmXf1Zav/t7pZdWI62',NULL,'8888888888',26),(29,'mohan','nayak','mohan.nayak@gmail.com','$2b$10$r/d6wYSZ3FxgDLzQTlCsAOvlJcWoUsDbRYKTZG49zQcsNW/tibTny',NULL,'7411183313',30),(42,'Gunakara','Nayak','blah@blah.com','$2b$10$4ElKvNMF.Oy6CwKlnkycm.QEd93atCKzQMrSnzzfHPIuxKXWH5sgi',NULL,'4255888383',43);
+INSERT INTO `owner` VALUES (43,'John','Snow','john.snow@gmail.com','$2b$10$IBJLrRJtyazWeVxW/EOhk.ll0xjCo4zKmVjHOlJK/ldDtJJuvquBe','uploads/ownerImage43.jpeg','9876543211',44),(44,'Charles','Chaplin','charles.chaplin@gmail.com','$2b$10$yLEYeK/4TNg6Cj/eouWMGOllOaoTJZmRVU4fcGstsqHiHqlyrJx8S','uploads/ownerImage44.jpeg','9887653342',45);
 /*!40000 ALTER TABLE `owner` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -664,7 +664,7 @@ CREATE TABLE `restaurant` (
   `restaurantAddress` varchar(450) DEFAULT NULL,
   `restaurantZipCode` int(11) DEFAULT NULL,
   PRIMARY KEY (`restaurantId`)
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -673,7 +673,7 @@ CREATE TABLE `restaurant` (
 
 LOCK TABLES `restaurant` WRITE;
 /*!40000 ALTER TABLE `restaurant` DISABLE KEYS */;
-INSERT INTO `restaurant` VALUES (22,'Bawarchi','Indian','http://localhost:3001/uploads/restaurantImage22.jpeg','Santa clara North, Near the flyover',95054),(23,'Little pizza','','http://localhost:3001/uploads/restaurantImage23.jpeg','1516 vista club circle, apt no 102',95054),(25,'Little America','American',NULL,'Santa clara south',95058),(26,'Ross Gellar\'s Cafe',NULL,NULL,NULL,96064),(30,'Mohans cafe','Italian',NULL,'1578 santaclara',97809),(43,'Olive Graden','',NULL,'China Town',95054);
+INSERT INTO `restaurant` VALUES (22,'Bawarchi','Indian','http://localhost:3001/uploads/restaurantImage22.jpeg','Santa clara North, Near the flyover',95054),(23,'Little pizza','','http://localhost:3001/uploads/restaurantImage23.jpeg','1516 vista club circle, apt no 102',95054),(25,'Little America','American',NULL,'Santa clara south',95058),(26,'Ross Gellar\'s Cafe',NULL,NULL,NULL,96064),(30,'Mohans cafe','Italian',NULL,'1578 santaclara',97809),(43,'Olive Graden','',NULL,'China Town',95054),(44,'Pizza My Heart','Italian','uploads/restaurantImage44.jpeg','Norman Y. Mineta San Jose International Airport',95054),(45,'Olive Garden','American','uploads/restaurantImage45.jpeg','940 Blossom Hill Rd, San Jose, CA 95123',99064);
 /*!40000 ALTER TABLE `restaurant` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4173,4 +4173,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-10-04 12:10:41
+-- Dump completed on 2019-10-06 19:52:24

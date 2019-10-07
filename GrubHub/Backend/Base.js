@@ -1,12 +1,13 @@
 
 var mysql = require('mysql')
 var pool = mysql.createPool({
-    connectionLimit: 10,
+    connectionLimit: 1000,
     host: 'localhost',
     user: 'root',
     password: 'mahalasa',
     database: 'sys'
 })
+
 pool.getConnection((err, connection) => {
     if (err) {
         if (err.code === 'PROTOCOL_CONNECTION_LOST') {
@@ -19,7 +20,7 @@ pool.getConnection((err, connection) => {
             console.error('Database connection was refused.')
         }
     }
-    if (connection) connection.release()
+    if (connection) {connection.release();}
     return
 })
 module.exports = pool

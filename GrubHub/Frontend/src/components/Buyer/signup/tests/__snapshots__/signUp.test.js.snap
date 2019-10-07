@@ -1,0 +1,167 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render correctly Login component 1`] = `
+<div>
+  
+  <div
+    class="backgroundImg"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="login-form"
+      >
+        <div
+          class="main-div"
+        >
+          <div
+            class="panel"
+          >
+            <h2
+              class="heading"
+            >
+               Create your account
+            </h2>
+          </div>
+          <div
+            class=""
+          >
+            <div
+              class="row"
+            >
+              <div
+                class="col-md-6"
+              >
+                First Name
+              </div>
+              <div
+                class="col-md-6"
+              >
+                Last Name
+              </div>
+            </div>
+            <div
+              class="row"
+            >
+              <div
+                class="col-md-6"
+              >
+                <input
+                  class="form-control"
+                  name="firstName"
+                  onChange={[Function]}
+                  type="text"
+                />
+              </div>
+              <div
+                class="col-md-6 "
+              >
+                <input
+                  class="form-control"
+                  name="lastName"
+                  onChange={[Function]}
+                  type="text"
+                />
+              </div>
+            </div>
+            <br />
+            <div
+              class="row"
+            >
+              <div
+                class="col-md-12"
+              >
+                   Email
+              </div>
+            </div>
+            <div
+              class="row"
+            >
+              <div
+                class="col-md-12"
+              >
+                 
+                <input
+                  class="form-control email"
+                  name="email"
+                  onChange={[Function]}
+                  type="text"
+                />
+              </div>
+            </div>
+            <br />
+            <div
+              class="row"
+            >
+              <div
+                class="col-md-12"
+              >
+                  Password (8 characters minimum)
+              </div>
+            </div>
+            <div
+              class="row"
+            >
+              <div
+                class="col-md-12"
+              >
+                 
+                <input
+                  class="form-control email"
+                  name="password"
+                  onChange={[Function]}
+                  type="password"
+                />
+              </div>
+            </div>
+            <br />
+            <div
+              class="row"
+            >
+              <div
+                class="col-md-12"
+              >
+                Address
+              </div>
+            </div>
+            <div
+              class="row"
+            >
+              <div
+                class="col-md-12"
+              >
+                <textarea
+                  class="email"
+                  name="address"
+                  onChange={[Function]}
+                  row="3"
+                  type="text"
+                />
+              </div>
+            </div>
+          </div>
+          <br />
+          <button
+            class="btn btn-danger"
+            onClick={[Function]}
+          >
+            Sign Up
+          </button>
+          <br />
+          <br />
+          <br />
+          <br />
+          Have an account?
+          <a
+            class=""
+            href="/login"
+          >
+                 Log In
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
