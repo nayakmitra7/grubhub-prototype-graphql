@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import cookie from 'react-cookies';
-import axios from 'axios';
 import { withApollo } from 'react-apollo';
 import { Redirect } from 'react-router';
-import { address } from '../../../constant';
 import '../../../App.css';
 import { getBuyer } from '../../queries/queries'
 import {updateBuyerMutation} from '../../mutation/mutations'
@@ -45,7 +43,7 @@ class UpdateDetails extends Component {
                 firstName: response.data.buyer.buyerFirstName,
                 lastName: response.data.buyer.buyerLastName,
                 email: response.data.buyer.buyerEmail,
-                phone: response.data.buyer.buyerPhone,
+                phone: response.data.buyer.buyerPhone === null ? '':response.data.buyer.buyerPhone,
                 image: response.data.buyer.buyerImage,
                 ID: response.data.buyer.buyerID,
                 address: response.data.buyer.buyerAddress
@@ -99,9 +97,6 @@ class UpdateDetails extends Component {
 
     updateHandler = (e) => {
         e.preventDefault();
-        const data = { firstName: this.state.firstName, lastName: this.state.lastName, email: this.state.email, phone: this.state.phone, ID: this.state.ID, address: this.state.address };
-        axios.defaults.withCredentials = true;
-
         if (this.state.readOnly == false && this.state.firstName.length && this.state.lastName.length && this.state.email.length && this.state.address.length && this.state.phone.length==10) {
             this.props.client.mutate({
                 mutation:updateBuyerMutation,

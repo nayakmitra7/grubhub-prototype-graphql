@@ -17,4 +17,12 @@ const updateBuyerMutation = gql`
         }
     }
 `;
-export {loginBuyerMutation,updateBuyerMutation};
+const signupBuyerMutation = gql`
+    mutation SignupBuyer($firstName: String!, $lastName: String!, $email: String!, $password: String!,$address: String!){
+        signup(firstName: $firstName, lastName: $lastName, password: $password, email: $email,address:$address){
+            status
+            msg
+        }
+    }
+`;
+export {loginBuyerMutation,updateBuyerMutation,signupBuyerMutation};

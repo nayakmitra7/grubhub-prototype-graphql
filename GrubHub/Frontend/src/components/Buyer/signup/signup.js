@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import '../../../App.css';
-import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
-import { address } from '../../../constant';
+import {signupBuyerMutation} from '../../mutation/mutations'
+import { withApollo } from 'react-apollo';
 
 class signup extends Component {
     constructor() {
@@ -51,29 +51,31 @@ class signup extends Component {
         });
     }
     signupHandler = (e) => {
-        e.preventDefault();
-        axios.defaults.withCredentials = true;
-
-        var data = { firstName: this.state.firstName, lastName: this.state.lastName, password: this.state.password, email: this.state.email, address: this.state.address }
-        axios.post(address+"/buyer/signup", data)
-            .then((response) => {
-                sessionStorage.setItem("username",this.state.email)
-                sessionStorage.setItem("FirstName",this.state.firstName)
-                if (response.status === 200) {
-
-                    this.setState({
-                        authFlag: true,
-                        errorMessage: []
-                    })
-
-                } else if (response.status === 201) {
-                    this.setState({
-                        errorMessage: response.data,
-                        authFlag: false
-                    })
-                }
-
+        this.props.client.mutate({
+            mutation:signupBuyerMutation,
+            variables:{
+                firstName:this.state.firstName,
+                lastName:this.state.lastName,
+                email:this.state.email,
+                address:this.state.address,
+                password:this.state.password,
+            }
+        }).then((response)=>{
+           if(response.data.signup.status === 200){
+            cookie.save('cookie', 'admin', { path: '/' });
+            sessionStorage.setItem("username",this.state.email)
+            sessionStorage.setItem("FirstName",this.state.firstName)
+            this.setState({
+                authFlag: true,
+                errorMessage: []
             })
+           }else{
+            this.setState({
+                errorMessage: [response.data.signup.msg],
+                authFlag: false
+            })
+           }
+        })
 
     }
     render() {
@@ -85,7 +87,7 @@ class signup extends Component {
         let displayMessage = null;
         if (this.state.authFlag == false) {
             displayMessage = (this.state.errorMessage.map((error) => {
-                return (<div class="li alert-danger">{error.msg}</div>)
+                return (<div class="li alert-danger">{error}</div>)
             }))
         }
         return (
@@ -148,4 +150,4 @@ class signup extends Component {
     }
 }
 //export Home Component
-export default signup;
+export default withApollo(signup);

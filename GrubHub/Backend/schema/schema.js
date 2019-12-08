@@ -2,6 +2,7 @@ const graphql = require('graphql');
 const _ = require('lodash');
 var pool = require('../Base.js');
 const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const {
     GraphQLObjectType,
@@ -145,10 +146,40 @@ const Mutation = new GraphQLObjectType({
                 let data = { email: args.email, firstName: args.firstName,lastName: args.lastName,phone: args.phone,ID:args.ID,address:args.address };
                 return buyerUpdate({ data }).then(value => value);
             }
+        },
+        signup: {
+            type: responseType,
+            args: {
+                firstName: { type: new GraphQLNonNull(GraphQLString) },
+                lastName: { type: new GraphQLNonNull(GraphQLString) }, 
+                email: { type: new GraphQLNonNull(GraphQLString) },
+                password: { type: new GraphQLNonNull(GraphQLString) },
+                address:{type: new GraphQLNonNull(GraphQLString)}
+            },
+            resolve: (rootValue, args) => {
+                let data = { email: args.email, firstName: args.firstName,lastName: args.lastName,address:args.address,password:args.password };
+                return buyerSignup({ data }).then(value => value);
+            }
         }
 
     }
 });
+buyerSignup = ({data}) => {
+    return new Promise((resolve, reject) => {
+        bcrypt.hash(data.password, saltRounds, function (err, hash) {
+            if (!err) {
+                var query = 'INSERT INTO buyer (buyerFirstName, buyerLastName, buyerPassword,buyerEmail,buyerAddress) VALUES ("' + data.firstName + '","' + data.lastName + '","' + hash + '","' + data.email + '","' + data.address + '");'
+                pool.query(query, function (err, result, fields) {
+                    if (err) resolve({status:500,msg:'Something went Wrong'});
+                    resolve({status:200,msg:'Successfully updated'});
+                })
+            } else {
+                resolve({status:500,msg:'Something went Wrong'});
+            }
+        });
+    
+    });
+};
 fetchItem = (restaurantId) => {
     return new Promise((resolve, reject) => {
         let sql = 'Select ItemName,SectionId,ItemPrice,ItemDesc,ItemId from menuItems where restaurantId="' + restaurantId + '"'

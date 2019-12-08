@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import '../../../App.css';
-import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
-import {address} from '../../../constant'
 import { fetchItemQuery,fetchSectionQuery } from '../../queries/queries'
 import { withApollo } from 'react-apollo';
 
