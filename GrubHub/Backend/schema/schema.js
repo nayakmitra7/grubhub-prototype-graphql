@@ -7,10 +7,10 @@ const {
     GraphQLObjectType,
     GraphQLString,
     GraphQLSchema,
-    GraphQLID,
     GraphQLInt,
     GraphQLList,
-    GraphQLNonNull
+    GraphQLNonNull,
+    GraphQLFloat
 } = graphql;
 
 const buyerType = new GraphQLObjectType({
@@ -26,10 +26,42 @@ const buyerType = new GraphQLObjectType({
 });
 
 const responseType = new GraphQLObjectType({
-    name: 'BuyerLogin',
+    name: 'response',
     fields: () => ({
         status: { type: GraphQLInt },
         msg: {type:GraphQLString}
+    })
+});
+
+const restaurantType = new GraphQLObjectType({
+    name: 'restaurant',
+    fields: () => ({
+        restaurantId: { type: GraphQLInt },
+        restaurantName: {type:GraphQLString},
+        restaurantCuisine: {type:GraphQLString},
+        restaurantAddress: {type:GraphQLString},
+
+    })
+});
+const itemType = new GraphQLObjectType({
+    name: 'item',
+    fields: () => ({
+        SectionId: { type: GraphQLInt },
+        ItemId: { type: GraphQLInt },
+        ItemName: {type:GraphQLString},
+        ItemPrice: { type: GraphQLFloat },
+        ItemDesc: {type:GraphQLString},
+
+    })
+});
+const sectionType = new GraphQLObjectType({
+    name: 'section',
+    fields: () => ({
+        count: { type: GraphQLInt },
+        menuSectionId: { type: GraphQLInt },
+        menuSectionName: {type:GraphQLString},
+        menuSectionDesc: {type:GraphQLString},
+
     })
 });
 
@@ -43,6 +75,45 @@ const RootQuery = new GraphQLObjectType({
                 return getBuyer(args.id).then(value => value[0]);
             }
         },
+        restaurant: {
+            type:  new GraphQLList(restaurantType),
+            args: { item: { type: new GraphQLNonNull(GraphQLString) } },
+            resolve: (rootValue, args) => {
+                return searchRestaurants(args.item).then((value) => {
+                    let response=[];
+                    value.forEach(element => {
+                        response.push(element)
+                    });
+                    return response;
+                });
+            }
+        }, 
+        item: {
+            type:  new GraphQLList(itemType),
+            args: { restaurantId: { type: new GraphQLNonNull(GraphQLInt) } },
+            resolve: (rootValue, args) => {
+                return fetchItem(args.restaurantId).then((value) => {
+                    let response=[];
+                    value.forEach(element => {
+                        response.push(element)
+                    });
+                    return response;
+                });
+            }
+        },
+        section: {
+            type:  new GraphQLList(sectionType),
+            args: { restaurantId: { type: new GraphQLNonNull(GraphQLInt) } },
+            resolve: (rootValue, args) => {
+                return fetchSection(args.restaurantId).then((value) => {
+                    let response=[];
+                    value.forEach(element => {
+                        response.push(element)
+                    });
+                    return response;
+                });
+            }
+        }
     }
 });
 
@@ -78,11 +149,38 @@ const Mutation = new GraphQLObjectType({
 
     }
 });
+fetchItem = (restaurantId) => {
+    return new Promise((resolve, reject) => {
+        let sql = 'Select ItemName,SectionId,ItemPrice,ItemDesc,ItemId from menuItems where restaurantId="' + restaurantId + '"'
+        pool.query(sql, (err, results) => {
+            if (err) resolve({status:500,msg:'Something went Wrong'});
+            resolve(JSON.parse(JSON.stringify(results)));
+        });
+    });
+};
+fetchSection = (restaurantId) => {
+    return new Promise((resolve, reject) => {
+        let sql = 'Select menuSectionId,menuSectionName,menuSectionDesc ,count(itemName) as count from sys.menuSection left outer join sys.menuItems  on   menuSection.menuSectionId =menuItems.SectionId where menuSection.restaurantId=' + restaurantId + ' group by menuSectionId order by menuSectionName Asc';
+        pool.query(sql, (err, results) => {
+            if (err) resolve({status:500,msg:'Something went Wrong'});
+            resolve(JSON.parse(JSON.stringify(results)));
+        });
+    });
+};
 getBuyer = (email) => {
     return new Promise((resolve, reject) => {
         let sql = `Select buyerFirstName,buyerLastName,buyerEmail,buyerPhone,buyerID,buyerAddress from buyer where buyerEmail="` + email + `"`;
         pool.query(sql, (err, results) => {
-            if (err) reject(err);
+            if (err) resolve({status:500,msg:'Something went Wrong'});
+            resolve(JSON.parse(JSON.stringify(results)));
+        });
+    });
+};
+searchRestaurants = (item) => {
+    return new Promise((resolve, reject) => {
+        let sql = 'select restaurantId,restaurantName,restaurantCuisine,restaurantAddress from restaurant where restaurantId in (SELECT restaurantId FROM menuItems where ItemName like "%' + item + '%")'
+        pool.query(sql, (err, results) => {
+            if (err) resolve({status:500,msg:'Something went Wrong'});
             resolve(JSON.parse(JSON.stringify(results)));
         });
     });

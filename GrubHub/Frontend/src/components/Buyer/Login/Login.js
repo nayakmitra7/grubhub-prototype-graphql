@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import '../../../App.css';
-import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
 import { withApollo } from 'react-apollo';
@@ -24,7 +23,6 @@ class Login extends Component {
         this.fetchDetails = this.fetchDetails.bind(this);
     }
     componentDidMount() {
-        this.fetchDetails("nayakmitra7@gmail.com")
         this.setState({
             authFlag: false
         })
@@ -56,12 +54,6 @@ class Login extends Component {
     }
 
     submitLogin = (e) => {
-        e.preventDefault();
-        const data = {
-            username: this.state.username,
-            password: this.state.password
-        }
-        axios.defaults.withCredentials = true;
         this.props.client.mutate({
             mutation: loginBuyerMutation,
             variables: {

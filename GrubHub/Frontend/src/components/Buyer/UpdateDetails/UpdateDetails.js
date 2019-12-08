@@ -32,7 +32,6 @@ class UpdateDetails extends Component {
         this.readOnlyHandler = this.readOnlyHandler.bind(this);
         this.pictureChangeHandler = this.pictureChangeHandler.bind(this)
         this.resetPicture = this.resetPicture.bind(this)
-        this.uploadImageHandler = this.uploadImageHandler.bind(this)
 
     }
     componentDidMount(){
@@ -53,27 +52,7 @@ class UpdateDetails extends Component {
             })
         })
     }
-    uploadImageHandler = (e) => {
-        if (this.state.file) {
-            e.preventDefault();
-            let formData = new FormData();
-            formData.append('myImage', this.state.file, this.state.ID);
-            const config = {
-                headers: {
-                    'content-type': 'multipart/form-data'
-                }
-            };
-            axios.post(address + "/upload/photo", formData, config)
-                .then((response) => {
-                    this.setState({ errorFlag: 'Success' })
-                    setTimeout(() => {
-                        this.setState({ errorFlag: '' })
-                    }, 2000);
-                }).catch((error) => {
-                });
-        }
-
-    }
+   
     pictureChangeHandler(event) {
         if (event.target.files[0]) {
             this.setState({
@@ -176,13 +155,7 @@ class UpdateDetails extends Component {
             messageDisplay = (<ul class="li alert alert-success">Successfully Updated !!!</ul>);
         }
 
-        if (this.state.filePreview) {
-            image = <div class="img" style={{ paddingBottom: '20px' }}><img style={{ width: "80%" }} src={this.state.filePreview} class="img-circle" onChange={this.pictureChangeHandler} /></div>
-            uploadImage = <button onClick={this.uploadImageHandler}>Upload Image</button>
-
-        } else if (this.state.file) {
-            image = <div class="img" style={{ paddingBottom: '20px' }}><img style={{ width: "80%" }} src={this.state.file} class="img-circle" onChange={this.pictureChangeHandler} /></div>
-        }
+      
         let createDisplay = (
             <div>
 
@@ -192,7 +165,6 @@ class UpdateDetails extends Component {
                 </div>
                 <div class="row" style={{ paddingBottom: '10px' }}>
                     <div class="col-md-6" style={{ paddingLeft: '50px' }}>
-                        <div class="col-md-6"><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name="myImage" class="custom-file-input" /></div>
                         <div class="col-md-6">{uploadImage}</div>
                         {image}
                     </div>

@@ -1,10 +1,9 @@
 import '../../../App.css';
 import React, { Component } from 'react';
 import cookie from 'react-cookies';
-import axios from 'axios';
 import { Redirect } from 'react-router';
-import {address} from '../../../constant'
 import { withApollo } from 'react-apollo';
+import { getBuyer } from '../../queries/queries'
 
 class HomePage extends Component {
     constructor(props){
@@ -17,19 +16,25 @@ class HomePage extends Component {
         this.itemSearchedChangeHandler = this.itemSearchedChangeHandler.bind(this);
        
     }
+
     componentDidMount=(e)=>{
-        axios.get(address+'/buyer/details/'+sessionStorage.getItem("username"))
-        .then(response => {
-            if(response.status === 200){
-                sessionStorage.setItem("Address",response.data.buyerAddress);
-                sessionStorage.setItem("FirstName",response.data.buyerFirstName);
-                sessionStorage.setItem("BuyerId",response.data.buyerID)
-                return Promise.resolve();
-            }
-          
-        });
+       this.fetchDetails(sessionStorage.getItem("username"));
     }
-   
+    fetchDetails = (username) => {
+        this.props.client.query({
+            query: getBuyer,
+            variables: {
+                userId: username
+            }
+        }).then((response) => {
+            if(response.data.buyer){
+                sessionStorage.setItem("Address", response.data.buyer.buyerAddress);
+                sessionStorage.setItem("FirstName", response.data.buyer.buyerFirstName);
+                sessionStorage.setItem("BuyerId", response.data.buyer.buyerID)
+            }
+      
+        })
+    }
     itemSearchedChangeHandler=(e)=>{
         this.setState({itemSearched:e.target.value,searchFlag:false})
     }

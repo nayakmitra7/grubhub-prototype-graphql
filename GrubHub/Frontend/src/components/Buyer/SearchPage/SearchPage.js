@@ -1,9 +1,9 @@
 
 import React, { Component } from 'react';
 import cookie from 'react-cookies';
-import axios from 'axios';
+import { searchRestaurantQuery } from '../../queries/queries'
 import { Redirect } from 'react-router';
-import {address} from '../../../constant'
+import { withApollo } from 'react-apollo';
 import '../../../App.css';
 
 class SearchPage extends Component {
@@ -17,31 +17,28 @@ class SearchPage extends Component {
             filterFlag: false,
             filterVal: "",
             detailsFlag: false,
-            searchFlag:false,
-            restaurantImage:"",
-            bag:localStorage.getItem(sessionStorage.getItem("username"))? JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))) :[],
+            searchFlag: false,
+            restaurantImage: "",
+            bag: localStorage.getItem(sessionStorage.getItem("username")) ? JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))) : [],
 
         }
         this.showRestaurantDetails = this.showRestaurantDetails.bind(this);
 
     }
-    
+
     itemSearch = () => {
         if (this.state.itemSearched.length) {
             this.setState({ itemToPrint: this.state.itemSearched, filterFlag: false })
-            axios.get(address+'/restaurant/restaurantSearched/' + this.state.itemSearched)
-                .then(response => {
-                    if (response.status === 200) {
-                        this.setState({
-                            restaurantsServingItem: response.data
-                        })
-                    } else if (response.status === 201) {
-                        this.setState({
-                            errorFlag: "Some error",
-                            errorMessage: response.data
-                        })
-                    }
+            this.props.client.query({
+                query: searchRestaurantQuery,
+                variables: {
+                    item: this.state.itemSearched
+                }
+            }).then((response)=>{
+                this.setState({
+                    restaurantsServingItem: response.data.restaurant
                 })
+            })
 
         }
 
@@ -49,8 +46,8 @@ class SearchPage extends Component {
     showRestaurantDetails = (e) => {
         sessionStorage.setItem("RestaurantID", e.target.id);
         sessionStorage.setItem("RestaurantName", e.target.innerHTML);
-        sessionStorage.setItem("ItemSearched","")
-        this.setState({ detailsFlag: true,searchFlag:false })
+        sessionStorage.setItem("ItemSearched", "")
+        this.setState({ detailsFlag: true, searchFlag: false })
 
     }
     itemSearchedChangeHandler = (e) => {
@@ -82,15 +79,15 @@ class SearchPage extends Component {
         if (!cookie.load('cookie')) {
             redirectVar = <Redirect to="/login" />
         }
-        if(this.state.detailsFlag==true){
+        if (this.state.detailsFlag == true) {
             redirectVar = <Redirect to="/DetailsPage" />
         }
         if (this.state.restaurantsServingItem.length) {
             this.state.restaurantsServingItem.map((restaurant) => {
                 array.push(
-                    <div class="row embossed-heavy " style={{ marginBottom: '0px', borderStyle: "groove", paddingTop: '20px', paddingBottom: '20px',backgroundColor:'white' }}>
+                    <div class="row embossed-heavy " style={{ marginBottom: '0px', borderStyle: "groove", paddingTop: '20px', paddingBottom: '20px', backgroundColor: 'white' }}>
                         <span class="border border-dark">
-                            <div class="col-md-3"><img style={{ width: "80%" }} src={restaurant.restaurantImage}  class="rounded"/></div>
+                            <div class="col-md-3"><img style={{ width: "80%" }} src={restaurant.restaurantImage} class="rounded" /></div>
                             <div class="col-md-5">
                                 <div class="row" style={{ fontSize: "15px", fontWeight: "600", color: "blue" }}>
                                     <p onClick={this.showRestaurantDetails} id={restaurant.restaurantId}>{restaurant.restaurantName}</p></div>
@@ -102,7 +99,6 @@ class SearchPage extends Component {
                             <br></br>
                         </span><br></br></div>)
             })
-            //if(this.state.searchFlag==true)
         } else {
             array.push(<div class="searchNotFound" style={{}}></div>)
         }
@@ -111,32 +107,19 @@ class SearchPage extends Component {
             this.state.restaurantsServingItem.map((restaurant) => {
                 if (restaurant.restaurantCuisine == this.state.filterVal) {
                     array.push(
-                        <div class="row embossed-heavy " style={{ marginBottom: '0px', borderStyle: "groove", paddingTop: '20px', paddingBottom: '20px',backgroundColor:'white' }}>
+                        <div class="row embossed-heavy " style={{ marginBottom: '0px', borderStyle: "groove", paddingTop: '20px', paddingBottom: '20px', backgroundColor: 'white' }}>
                             <span class="border border-dark">
-                                <div class="col-md-3"><img style={{ width: "80%" }} src={restaurant.restaurantImage}  class="rounded"/></div>
+                                <div class="col-md-3"><img style={{ width: "80%" }} src={restaurant.restaurantImage} class="rounded" /></div>
                                 <div class="col-md-5">
                                     <div class="row" style={{ fontSize: "15px", fontWeight: "600", color: "blue" }}>
                                         <p onClick={this.showRestaurantDetails} id={restaurant.restaurantId}>{restaurant.restaurantName}</p></div>
                                     <div class="row">{restaurant.restaurantCuisine}</div>
                                 </div>
                                 <div class="col-md-4"></div>
-    
-    
+
+
                                 <br></br>
                             </span><br></br></div>)
-                   /* array.push(<div class="row " style={{ marginBottom: '25px', borderStyle: "groove", paddingTop: '10px', paddingBottom: '10px' }}>
-                        <span class="border border-dark">
-                            <div class="col-md-3"><img></img></div>
-                            <div class="col-md-5">
-                                <div class="row" style={{ fontSize: "15px", fontWeight: "600", color: "blue" }}>
-                                    <p onClick={this.showRestaurantDetails} id={restaurant.restaurantId}>{restaurant.restaurantName}</p></div>
-                                <div class="row">{restaurant.restaurantCuisine}</div>
-                            </div>
-                            <div class="col-md-4"></div>
-
-
-                            <br></br>
-                    </span><br></br></div>)*/
                 }
 
             })
@@ -156,7 +139,7 @@ class SearchPage extends Component {
             var set1 = new Set();
             set1.add(<li class="li" onClick={this.filterView}>None</li>)
             this.state.restaurantsServingItem.forEach((item) => {
-                set1.add(<li class="li"><div id={item.restaurantCuisine} onClick={this.filterView} style={{backgroundColor:""}}>{item.restaurantCuisine}</div></li>)
+                set1.add(<li class="li"><div id={item.restaurantCuisine} onClick={this.filterView} style={{ backgroundColor: "" }}>{item.restaurantCuisine}</div></li>)
             })
             filterBy = set1;
         }
@@ -164,13 +147,13 @@ class SearchPage extends Component {
             <div>
                 {redirectVar}
                 <div class="row" style={{ backgroundColor: "white" }}>
-                    <div class="col-md-6" style={{ marginTop: '20px',paddingLeft:'25px' }}>
+                    <div class="col-md-6" style={{ marginTop: '20px', paddingLeft: '25px' }}>
                         <div class="col-md-6 "><input onChange={this.itemSearchedChangeHandler} style={{ height: '45px' }} class="col-md-12" type="text" placeholder="What are you looking for?"></input></div>
                         <div class="col-md-2"><button class="btn btn-info btn-lg" onClick={this.serachFood} >Find Food</button></div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-4" style={{ paddingTop: '30px', fontSize: '24px', paddingBottom: '30px',paddingLeft:'30px' }}>The Restaurants serving {this.state.itemToPrint} are:</div>
+                    <div class="col-md-4" style={{ paddingTop: '30px', fontSize: '24px', paddingBottom: '30px', paddingLeft: '30px' }}>The Restaurants serving {this.state.itemToPrint} are:</div>
                     <div class="col-md-6"></div>
                     <div class="col-md-2" style={{ marginTop: '20px' }}>
                         <div class="dropdown">
@@ -196,5 +179,5 @@ class SearchPage extends Component {
     }
 }
 
-export default SearchPage;
+export default withApollo(SearchPage);
 

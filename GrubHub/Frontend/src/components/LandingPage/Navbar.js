@@ -58,20 +58,11 @@ class Navbar extends Component {
  
       // eslint-disable-next-line no-restricted-globals
     } else if (location.pathname.endsWith("/UpdateDetails") || location.pathname.endsWith("/HomePage") || location.pathname.endsWith("/SearchPage") || location.pathname.endsWith("/DetailsPage") || location.pathname.endsWith("/ReviewPage") || location.pathname.endsWith("/UpcomingOrder") || location.pathname.endsWith("/PastOrder")) {
-      grubHub = (<a class="navbar-brand" href="/login">GRUBHUB</a>);
+      grubHub = (<a class="navbar-brand" href="/HomePage">GRUBHUB</a>);
       userDetails = (<div class="dropdown" style={{ marginRight: '85px' }}>
         <button class="btn btn-default btn-lg dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Hi, {sessionStorage.getItem("FirstName")} !
         <span class="caret" style={{ marginLeft: '5px' }}></span></button>
         <ul class="dropdown-menu" role="menu" aria-labelledby="menu1" style={{ width: '50px', minWidth: '250px', paddingLeft: '10px', textAlign: 'center', color: 'blue' }}>
-
-          <div class="row">
-            <div class="col-md-6"><li style={{ fontSize: '40px' }}><a href="/PastOrder"><span class="glyphicon glyphicon-time"></span></a></li></div>
-            <div class="col-md-6"><li style={{ fontSize: '40px' }}><a href="/UpcomingOrder"><span class="glyphicon glyphicon-calendar"></span></a></li></div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">Past Orders</div>
-            <div class="col-md-6">Upcoming Orders</div>
-          </div>
           <div class="row" style={{ marginTop: '20px' }}>
             <div class="col-md-6"><li style={{ fontSize: '40px' }}><a href='/UpdateDetails'><span class="glyphicon glyphicon-cog"></span></a></li></div>
             <div class="col-md-6"><li style={{ fontSize: '40px' }}><a href='/HomePage'><span class="glyphicon glyphicon-home"></span></a></li></div>

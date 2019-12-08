@@ -4,8 +4,8 @@ import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
 import {address} from '../../../constant'
-
-
+import { fetchItemQuery,fetchSectionQuery } from '../../queries/queries'
+import { withApollo } from 'react-apollo';
 
 class DetailsPage extends Component {
     constructor(props) {
@@ -32,42 +32,11 @@ class DetailsPage extends Component {
             itemsPresent: [],
             checkoutFlag: false
         }
-        this.addItemModal = this.addItemModal.bind(this);
-        this.incrementCount = this.incrementCount.bind(this);
-        this.decrementCount = this.decrementCount.bind(this);
-        this.addToBag = this.addToBag.bind(this);
         this.itemSearchedChangeHandler = this.itemSearchedChangeHandler.bind(this);
 
     }
-    CheckOut = () => {
-        this.setState({ checkoutFlag: true })
-        var today = new Date();
-        var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-        var time = today.getHours() + ":" + today.getMinutes();
-        var CurrentDateTime = date + ' ' + time
-        var data = { restaurantId: this.state.restaurantId, buyerID: sessionStorage.getItem("BuyerId"), buyerAddress: sessionStorage.getItem("Address"), orderStatus: "New", bag: localStorage.getItem(sessionStorage.getItem("username")), date: CurrentDateTime }
-        axios.post(address+'/Order', data)
-            .then(response => {
-                if (response.status === 200) {
-                    this.setState({ bag: [] })
-                    localStorage.removeItem(sessionStorage.getItem("username"))
-                }
-                else if (response.status === 201) {
-
-                }
-            });
-    }
-    openShoppingCart = () => {
-        document.getElementById("shoppingCart").style.display = "block";
-    }
-    closeShoppingCart = () => {
-        document.getElementById("shoppingCart").style.display = "none";
-
-    }
-    cancelBagAdd = () => {
-        this.warningMessageClose();
-        document.getElementById("modalAddItem").style.display = "none"
-    }
+   
+    
     serachFood = () => {
         if (this.state.itemSearched.length) {
             this.setState({ searchFlag: true })
@@ -77,145 +46,37 @@ class DetailsPage extends Component {
     itemSearchedChangeHandler = (e) => {
         this.setState({ itemSearched: e.target.value })
     }
-    emptyBag1 = () => {
-        return new Promise((resolve, reject) => {
-            document.getElementById("warningMessage").style.display = "none";
-            this.setState({ bag: [], count: 0 });
-            localStorage.setItem(sessionStorage.getItem("username"), JSON.stringify([]));
-            resolve();
-        })
-    }
-    emptyBag = () => {
-        this.emptyBag1().then(() => {
-            this.addToBag();
-        })
-    }
-    checkIfSameRetaurant = (e) => {
-        if (this.state.bag.length) {
-            var item = this.state.bag[0];
-            if (item.restaurantId == this.state.restaurantId) {
-                return 1;
-            } else {
-                return 0;
-            }
-        } else {
-            return 1;
-        }
-    }
-    addToBag = () => {
-        var item = { itemId: this.state.itemId, itemName: this.state.itemName, itemCostTotal: parseFloat(this.state.itemCostTotal), itemCount: this.state.itemCount, restaurantId: this.state.restaurantId }
-        if (this.checkIfSameRetaurant()) {
-            var itemPresent = false;
-            this.state.bag.forEach((itemInBag) => {
-                if (itemInBag.itemId == this.state.itemId) {
-                    itemPresent = true;
-                    itemInBag.itemCount += this.state.itemCount;
-                    itemInBag.itemCostTotal = parseFloat(itemInBag.itemCostTotal) + parseFloat(this.state.itemCostTotal);
-                }
-            })
-            this.setState({ messageFlag: true })
-            if (itemPresent == false) {
-                this.state.bag.push(item);
-                var count1 = this.state.count;
-                this.setState({ count: count1 + 1 })
-            }
-            this.setState({ itemCount: 1 });
-            setTimeout(() => {
-                document.getElementById("modalAddItem").style.display = "none"
-                this.setState({ messageFlag: false })
-            }, 1000);
-            localStorage.setItem(sessionStorage.getItem("username"), JSON.stringify(this.state.bag));
-        } else {
-            document.getElementById("warningMessage").style.display = "block"
-        }
-    }
-    warningMessageClose = () => {
-        document.getElementById("warningMessage").style.display = "none";
-
-    }
-    decrementCount = (e) => {
-        if (this.state.itemCount > 1) {
-            var quantity = this.state.itemCount - 1;
-            var cost = this.state.itemPrice;
-            var costTotal = quantity * cost;
-            this.setState({ itemCount: quantity, itemCostTotal: parseFloat(costTotal).toFixed(2) })
-
-        }
-    }
-    incrementCount = (e) => {
-        var quantity = this.state.itemCount + 1;
-        var cost = this.state.itemPrice;
-        var costTotal = quantity * cost;
-        this.setState({ itemCount: quantity, itemCostTotal: parseFloat(costTotal).toFixed(2) })
-
-    }
-
+   
     promiseGetSections = () => {
         return new Promise((resolve, reject) => {
-
-            axios.get(address+'/section/' + this.state.restaurantId)
-                .then(response => {
-                    if (response.status === 200) {
-                        this.setState({
-                            sectionsPresent: response.data
-                        })
-                        resolve();
-                    }
+            this.props.client.query({
+                query: fetchSectionQuery,
+                variables: {
+                    restaurantId: parseInt(this.state.restaurantId) 
+                }
+            }).then((response)=>{
+                this.setState({
+                    sectionsPresent: response.data.section
                 })
-
+            })
         })
     }
     promiseGetItems = () => {
         return new Promise((resolve, reject) => {
-
-            axios.get(address+'/item/' + this.state.restaurantId)
-                .then(response => {
-                    if (response.status === 200) {
-                        this.setState({
-                            itemsPresent: response.data
-                        })
-                        resolve();
-                    }
+            this.props.client.query({
+                query: fetchItemQuery,
+                variables: {
+                    restaurantId: parseInt(this.state.restaurantId) 
+                }
+            }).then((response)=>{
+                this.setState({
+                    itemsPresent: response.data.item
                 })
-
+            })
         })
     }
 
-    addItemModal = (e) => {
-
-        document.getElementById("modalAddItem").style.display = "block";
-        this.setState({ itemId: e.target.id })
-        var item = this.state.itemsPresent.filter((i) => {
-            if (i.ItemId == e.target.id) {
-                return i;
-            }
-        })
-        var quantity = this.state.itemCount;
-        var cost = parseFloat(item[0].ItemPrice);
-        var itemTotal = quantity * cost;
-        this.setState({
-            itemName: item[0].ItemName,
-            itemDesc: item[0].ItemDesc,
-            itemPrice: item[0].ItemPrice,
-            itemCount: 1,
-            itemCostTotal: parseFloat(itemTotal)
-        })
-    }
-    modalCloseSection = () => {
-        document.getElementById("modalAddItem").style.display = "none"
-        this.setState({ itemCount: 1 })
-    }
-    deleteItem = (e) => {
-        var val = this.state.bag.filter((bag) => {
-            if (e.target.id != bag.itemId) {
-                return bag;
-            }
-        })
-        var len = val.length
-        this.setState({ bag: val, count: len })
-        localStorage.setItem(sessionStorage.getItem("username"), JSON.stringify(val));
-
-    }
+    
     componentDidMount() {
 
         this.promiseGetSections();
@@ -227,59 +88,18 @@ class DetailsPage extends Component {
 
     render() {
         var redirectVar = "";
-        var bagDispay = ""
-        var bagButtonDisplay = "";
         var array = [];
-        var subTotal = parseFloat(0);
-        if (this.state.bag.length) {
-            array.push(<div class="row"><div class="col-md-12" style={{ textAlign: 'center', fontSize: '25px', marginBottom: '20px' }}>{this.state.restaurantName}</div> </div>)
-            array.push(<div class="row" style={{ textAlign: 'center' }}>
-                <div className="col-md-2" style={{ fontSize: "18px" }}><p>Quantity</p></div>
-                <div className="col-md-4" style={{ fontSize: "18px" }}><p>Item Name</p></div>
-                <div className="col-md-3"></div>
-                <div className="col-md-3" style={{ fontSize: "18px" }}><p>Cost</p></div>
-            </div>)
-
-            this.state.bag.forEach((bag) => {
-                subTotal += parseFloat(bag.itemCostTotal);
-                array.push(<div class="row" style={{ textAlign: 'center' }}>
-                    <div className="col-md-2"><p>{bag.itemCount}</p></div>
-                    <div className="col-md-4"><p>{bag.itemName}</p></div>
-                    <div className="col-md-3"><span id={bag.itemId} class="glyphicon glyphicon-trash" onClick={this.deleteItem}></span></div>
-                    <div className="col-md-3"><p>${bag.itemCostTotal}</p></div>
-                </div>)
-
-            })
-            subTotal = parseFloat(subTotal).toFixed(2);
-            array.push(<hr style={{ borderBottom: "1px solid #fff" }}></hr>)
-            array.push(<div class="row">
-                <div class="col-md-7"></div>
-                <div class="col-md-3" style={{ fontSize: '18px' }}>Sub Total : </div>
-                <div class="col-md-1" style={{ fontSize: '18px' }}>${subTotal}</div>
-                <div class="col-md-1"></div>
-            </div>)
-            bagDispay = array;
-            bagButtonDisplay = (<div><input type="button" class="btn btn-success" value="Place Order" onClick={this.CheckOut} /></div>)
-        } else {
-            bagDispay = (<div class=" emptyBag" style={{ paddingTop: '250px', paddingBottom: '250px' }}></div>)
-            bagButtonDisplay = ""
-        }
         if (!cookie.load('cookie')) {
             redirectVar = <Redirect to="/login" />
         }
-        if (this.state.checkoutFlag == true) {
-            redirectVar = <Redirect to="/ReviewPage" />
-        }
+       
         if (this.state.searchFlag == true) {
             this.setState({ searchFlag: false })
             if (this.state.itemSearched.length) {
                 redirectVar = <Redirect to="/SearchPage" />
             }
         }
-        var messageDisplay = ""
-        if (this.state.messageFlag == true) {
-            messageDisplay = (<ul class="li alert alert-success">Added this to your bag !!!</ul>);
-        }
+        
         var array = [];
         if (this.state.sectionsPresent.length) {
             array.push(<div class="row" style={{ fontSize: "30px", fontWeight: "900" }}>
@@ -361,140 +181,9 @@ class DetailsPage extends Component {
                     <div class="col-sm-5"></div>
                     <div class="col-sm-5" style={{ marginTop: '0px' }}></div>
                 </div>
-                <div class="modal" id="modalAddItem" >
-                    <div class="modal-dialog" style={{ width: '850px', height: '1850px' }}>
-                        <div class="modal-content">
-
-                            <div class="modal-header">
-                                <div class="row">
-                                    <div class="col-md-5"></div>
-                                    <div class="col-md-6"><h4 class="modal-title">{this.state.itemName}</h4></div>
-                                    <div class="col-md-1"><button type="button" id="closeSection" data-dismiss="modal" onClick={this.modalCloseSection}>&times;</button></div>
-                                </div>
-                            </div>
-                            <div class="modal-body">
-
-                                <div class="row" style={{ paddingLeft: "25px", paddingRight: "25px" }}>
-                                    <div class="row" style={{ paddingBottom: "5px" }}>
-                                        Description
-                                </div>
-                                    <div class="row" style={{ paddingBottom: "15px" }}>
-                                        <p>{this.state.itemDesc}</p>
-                                    </div>
-                                </div>
-                                <div class="row" style={{ paddingLeft: "25px", paddingRight: "25px" }}>
-                                    <div class="row" style={{ paddingBottom: "5px" }}>
-                                        Item Price
-                                </div>
-                                    <div class="row" style={{ paddingBottom: "15px" }}>
-                                        ${this.state.itemPrice}
-                                    </div>
-                                </div>
-                                <div class="row" style={{ paddingLeft: "25px", paddingRight: "25px" }}>
-                                    <div class="row" style={{ paddingBottom: "5px" }}>
-                                        <p style={{ fontWeight: '900' }} >Quantity</p>
-                                    </div>
-                                    <div class="row" style={{ paddingBottom: "15px" }}>
-                                        <div class="col-md-1">   <input type='button' value='-' class='qtyminus btn-danger' field='quantity' onClick={this.decrementCount} /></div>
-                                        <div class="col-md-1" style={{ paddingLeft: "0px", paddingRight: "0px" }}>   <input type='number' name='quantity' min="1" value={this.state.itemCount} class='qty' /></div>
-                                        <div class="col-md-1" style={{ paddingLeft: "0px", paddingRight: "0px" }}>   <input type='button' value='+' class='qtyplus btn-success' field='quantity' onClick={this.incrementCount} /></div>
-                                        <div class="col-md-9"></div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <div class="modal-footer">
-
-                                <div class="row">
-                                    <div class="col-md-2"></div>
-                                    <div class="col-md-3"><button class="btn btn-success btn-lg" style={{ width: '300px' }} onClick={this.addToBag}>Add to bag : ${this.state.itemCostTotal}</button>
-                                    </div>
-                                    <div class="col-md-7"></div>
-                                </div>
-                                <div class="row">
-                                    <div class="row" style={{ paddingLeft: "25px", paddingRight: "25px", paddingTop: "25px" }}>
-                                        {messageDisplay}
-
-                                    </div>
-
-                                </div>
-
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="modal" id="shoppingCart" >
-                    <div class="modal-dialog" >
-                        <div class="modal-content" >
-
-                            <div class="modal-header">
-                                <div class="row">
-                                    <div class="col-md-4"></div>
-                                    <div class="col-md-6"><h4 class="modal-title">Shopping Cart</h4></div>
-                                    <div class="col-md-2"><button type="button" id="closeSection" data-dismiss="modal" onClick={this.closeShoppingCart}>&times;</button></div>
-                                </div>
-
-
-                            </div>
-
-                            <div class="modal-body" style={{ height: "600px" }}>
-                                {bagDispay}
-                                <div><span class="border border-top-0 border-right-0 border-left-0"></span></div>
-
-                            </div>
-
-                            <div class="modal-footer">
-
-                                <div class="row">
-                                    {bagButtonDisplay}
-                                </div>
-
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="modal" id="warningMessage" >
-                    <div class="modal-dialog" >
-                        <div class="modal-content" >
-
-                            <div class="modal-header">
-                                <div class="row">
-                                    <div class="col-md-4"></div>
-                                    <div class="col-md-6"><h4 class="modal-title">Warning Message</h4></div>
-                                    <div class="col-md-2"><button type="button" id="closeSection" data-dismiss="modal" onClick={this.warningMessageClose}>&times;</button></div>
-                                </div>
-
-
-                            </div>
-
-                            <div class="modal-body" style={{ fontWeight: "900" }}>
-                                Adding this will delete all other items in the bag. Do you want to proceed?
-                            </div>
-
-                            <div class="modal-footer">
-
-                                <div class="row">
-                                    <div class="col-md-3"></div>
-                                    <div class="col-md-3"><button class="btn btn-success btn-lg" onClick={this.emptyBag}>Yes,Please</button></div>
-                                    <div class="col-md-3"><button class="btn btn-danger btn-lg" style={{ width: "150px" }} onClick={this.cancelBagAdd}>No, Thanks!</button></div>
-                                    <div class="col-md-3"></div>
-                                </div>
-
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
             </div>
         )
     }
 }
 //export Login Component
-export default DetailsPage;
+export default withApollo(DetailsPage);
