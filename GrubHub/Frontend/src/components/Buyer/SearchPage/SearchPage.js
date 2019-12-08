@@ -36,7 +36,7 @@ class SearchPage extends Component {
                 }
             }).then((response)=>{
                 this.setState({
-                    restaurantsServingItem: response.data.restaurant
+                    restaurantsServingItem: response.data.restaurants
                 })
             })
 

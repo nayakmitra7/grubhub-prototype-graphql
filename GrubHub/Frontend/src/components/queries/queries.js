@@ -12,11 +12,24 @@ query GetBuyer($userId: String!){
       buyerAddress
     }
   }
-  
+`;
+const getOwner = gql`
+query GetOwner($userId: String!){
+    Owner (id: $userId)
+    {
+    ownerId
+    ownerEmail
+    ownerPhone
+    ownerLastName
+    ownerFirstName
+    restaurantId
+    restaurantName
+    }
+  }
 `;
 const searchRestaurantQuery = gql`
 query SearchRestaurant($item: String!){
-    restaurant (item: $item)
+    restaurants (item: $item)
     {
       restaurantId
       restaurantName
@@ -51,5 +64,16 @@ query FetchSection($restaurantId: Int!){
   }
   
 `;
-
-export { getBuyer,searchRestaurantQuery,fetchItemQuery,fetchSectionQuery };
+const fetchRestaurantQuery = gql`
+query FetchRestaurant($restaurantId: Int!){
+    restaurant (id: $restaurantId)
+    {
+      restaurantName
+      restaurantCuisine
+      restaurantAddress
+      restaurantZipCode
+    }
+  }
+  
+`;
+export { getBuyer, getOwner, searchRestaurantQuery, fetchItemQuery, fetchSectionQuery ,fetchRestaurantQuery};

@@ -2,8 +2,11 @@ import React, { Component } from 'react';
 import cookie from 'react-cookies';
 import axios from 'axios';
 import { Redirect } from 'react-router';
+import { withApollo } from 'react-apollo';
 import { address } from '../../../constant'
 import '../../../App.css';
+import { getOwner,fetchRestaurantQuery } from '../../queries/queries'
+import { updateOwnerMutation,updateRestaurantMutation } from '../../mutation/mutations';
 
 
 class UpdateDetailsOwner extends Component {
@@ -13,10 +16,6 @@ class UpdateDetailsOwner extends Component {
             firstName: "",
             lastName: "",
             email: "",
-            file: null,
-            file2: null,
-            filePreview: null,
-            filePreview2: null,
             phone: "",
             errorMessage: [],
             authFlag: true,
@@ -39,119 +38,48 @@ class UpdateDetailsOwner extends Component {
         this.restaurantCuisineChangeHandler = this.restaurantCuisineChangeHandler.bind(this);
         this.restaurantAddressChangeHandler = this.restaurantAddressChangeHandler.bind(this);
         this.restaurantZipCodeChangeHandler = this.restaurantZipCodeChangeHandler.bind(this);
-        this.pictureChangeHandler = this.pictureChangeHandler.bind(this)
-        this.pictureChangeHandler2 = this.pictureChangeHandler2.bind(this)
+
 
     }
 
 
     componentDidMount() {
-        var data = ""
-        axios.get(address + '/restaurant/detailsOwner/' + sessionStorage.getItem("username"))
-            .then(response => {
-                if (response.status === 200) {
-                    this.setState({
-                        firstName: response.data.ownerFirstName,
-                        lastName: response.data.ownerLastName,
-                        email: response.data.ownerEmail,
-                        phone: response.data.ownerPhone,
-                        image: response.data.ownerImage,
-                        ownerId: response.data.ownerId,
-                        restaurantId: response.data.restaurantId
-                    })
-                    axios.get(address + "/owner/image/" + response.data.ownerId).then(responses => {
+        this.props.client.query({
+            query: getOwner,
+            variables: {
+                userId: sessionStorage.getItem("username")
+            }
+        }).then((response) => {
+            if(response.data.Owner){
+                this.setState({
+                    firstName: response.data.Owner.ownerFirstName,
+                    lastName: response.data.Owner.ownerLastName,
+                    email: response.data.Owner.ownerEmail,
+                    phone: response.data.Owner.ownerPhone,
+                    ownerId: response.data.Owner.ownerId,
+                    restaurantId: response.data.Owner.restaurantId
+                })
+                if (response.data.Owner.restaurantId) {
+                    this.props.client.query({
+                        query:fetchRestaurantQuery,
+                        variables:{restaurantId:parseInt(response.data.Owner.restaurantId)}
+                    }).then((responses)=>{
+                        console.log(responses)
                         this.setState({
-                            file: responses.data.ownerImage
-                        })
-                    })
-                } else if (response.status === 201) {
-                    this.setState({
-                        errorFlag: "Some error",
-                        errorMessage: response.data
-                    })
-                }
-            }).then(() => {
-                if (this.state.restaurantId) {
-                    data = this.state.restaurantId;
-                    axios.get(address + '/restaurant/detailsRestaurant/' + data).then((responses) => {
-                        axios.get(address + "/restaurant/image/" + this.state.restaurantId).then(responses => {
-                            this.setState({
-                                file2: responses.data.restaurantImage
-                            })
-                        })
-
-                        this.setState({
-                            restaurantName: responses.data.restaurantName,
-                            restaurantCuisine: responses.data.restaurantCuisine != null ? responses.data.restaurantCuisine : "",
-                            restaurantAddress: responses.data.restaurantAddress,
-                            restaurantZipCode: responses.data.restaurantZipCode
+                            restaurantName: responses.data.restaurant.restaurantName,
+                            restaurantCuisine: responses.data.restaurant.restaurantCuisine != null ? responses.data.restaurant.restaurantCuisine : "",
+                            restaurantAddress: responses.data.restaurant.restaurantAddress,
+                            restaurantZipCode: responses.data.restaurant.restaurantZipCode
                         })
                     })
                 }
-            })
+            }
+            
+        })
     }
-    uploadImageHandler = (e) => {
-        if (this.state.file) {
-            e.preventDefault();
-            let formData = new FormData();
-            formData.append('myImage', this.state.file, this.state.ownerId);
-            const config = {
-                headers: {
-                    'content-type': 'multipart/form-data'
-                }
-            };
-            axios.post(address + "/owner/image", formData, config)
-                .then((response) => {
-                    this.setState({errorFlag: "Success"})
-                    setTimeout(() => {
-                        this.setState({errorFlag: ""})
-                        
-                    }, 2000);
-                }).catch((error) => {
-                });
-        }
-
-    }
-    uploadImageHandler2 = (e) => {
-        if (this.state.file) {
-            e.preventDefault();
-            let formData = new FormData();
-            formData.append('myImage', this.state.file2, this.state.restaurantId);
-            const config = {
-                headers: {
-                    'content-type': 'multipart/form-data'
-                }
-            };
-            axios.post(address + "/restaurant/image", formData, config)
-                .then((response) => {
-                    this.setState({errorFlag: "Success"})
-                    setTimeout(() => {
-                        this.setState({errorFlag: ""})
-                        
-                    }, 2000);
-                }).catch((error) => {
-                });
-        }
-
-    }
-    pictureChangeHandler(event) {
-        if (event.target.files[0]) {
-            this.setState({
-                file: event.target.files[0],
-                filePreview: URL.createObjectURL(event.target.files[0])
-            });
-        }
-
-    }
-    pictureChangeHandler2(event) {
-        if (event.target.files[0]) {
-            this.setState({
-                file2: event.target.files[0],
-                filePreview2: URL.createObjectURL(event.target.files[0])
-            });
-        }
-
-    }
+  
+    
+   
     firstNameChangeHandler = (e) => {
         this.setState({
             firstName: e.target.value
@@ -199,53 +127,48 @@ class UpdateDetailsOwner extends Component {
     }
 
     promise1 = () => {
-        const data = { firstName: this.state.firstName, lastName: this.state.lastName, email: this.state.email, phone: this.state.phone, ownerId: this.state.ownerId, restaurantId: this.state.restaurantId, restaurantName: this.state.restaurantName, restaurantAddress: this.state.restaurantAddress, restaurantCuisine: this.state.restaurantCuisine, restaurantZipCode: this.state.restaurantZipCode };
-
         return new Promise((resolve, reject) => {
-            axios.post(address + '/restaurant/updateOwner', data)
-                .then(response => {
-                    if (response.status === 201) {
-                        this.setState({
-                            errorFlag: "Some error",
-                            errorMessage: response.data
-                        })
-                        reject();
-                    }
-                    else if (response.status === 200) {
-                        resolve();
-                    }
-                })
+            this.props.client.mutate({
+                mutation:updateOwnerMutation,
+                variables:{
+                    firstName:this.state.firstName,
+                    lastName:this.state.lastName,
+                    email:this.state.email,
+                    phone:this.state.phone,
+                    ownerId:this.state.ownerId
+
+                }
+            }).then(()=>{
+                resolve();
+            })
         })
     }
     updateHandler = (e) => {
         e.preventDefault();
         axios.defaults.withCredentials = true;
-        var restData = { restaurantId: this.state.restaurantId, restaurantName: this.state.restaurantName, restaurantAddress: this.state.restaurantAddress, restaurantCuisine: this.state.restaurantCuisine, restaurantZipCode: this.state.restaurantZipCode }
-
         if (this.state.readOnly == false) {
             this.promise1().then(() => {
-                axios.post(address + '/restaurant/updateRestaurant', restData)
-                    .then(response => {
-                        sessionStorage.setItem("OwnerFirstName", this.state.firstName)
-
-                        sessionStorage.setItem("RestaurantName", this.state.restaurantName)
-                        if (response.status === 200) {
-                            this.setState({
-                                errorFlag: "Success",
-                                readOnly: true
-                            })
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 500);
-
-                        }
-                        else if (response.status === 201) {
-                            this.setState({
-                                errorFlag: "Some error",
-                                errorMessage: response.data,
-                            })
-                        }
-                    });
+                this.props.client.mutate({
+                    mutation:updateRestaurantMutation,
+                    variables:{
+                        restaurantId:this.state.restaurantId,
+                        restaurantName:this.state.restaurantName,
+                        restaurantAddress:this.state.restaurantAddress,
+                        restaurantCuisine:this.state.restaurantCuisine,
+                        restaurantZipCode:parseInt(this.state.restaurantZipCode) 
+    
+                    }
+                }).then(()=>{
+                    sessionStorage.setItem("OwnerFirstName", this.state.firstName)
+                    sessionStorage.setItem("RestaurantName", this.state.restaurantName)
+                    this.setState({
+                        errorFlag: "Success",
+                        readOnly: true
+                    })
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                })
 
             })
 
@@ -313,7 +236,6 @@ class UpdateDetailsOwner extends Component {
                         </div>
                         <div class="col-md-6">
                             <div class="row">
-                                <div class="col-md-6"><input type="file" onChange={this.pictureChangeHandler} name="" class="custom-file-input" accept="image/*" /></div>
                                 <div class="col-md-6">{uploadImage}</div>
                             </div>
                             <div class="row"><div class="col-md-8">{image}</div></div>
@@ -359,7 +281,6 @@ class UpdateDetailsOwner extends Component {
                         </div>
                         <div class="col-md-6">
                             <div class="row">
-                                <div class="col-md-6"><input type="file" onChange={this.pictureChangeHandler2} name="myImage" class="custom-file-input" accept="image/*"/></div>
                                 <div class="col-md-6">{uploadImage2}</div>
                             </div>
                             <div class="row"><div class="col-md-8">{image2}</div>
@@ -395,4 +316,4 @@ class UpdateDetailsOwner extends Component {
     }
 }
 
-export default UpdateDetailsOwner;
+export default withApollo(UpdateDetailsOwner);

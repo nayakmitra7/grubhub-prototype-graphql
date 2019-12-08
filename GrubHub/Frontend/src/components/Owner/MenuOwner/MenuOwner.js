@@ -3,9 +3,10 @@ import '../../../App.css';
 import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
-import {address} from '../../../constant'
-
-
+import { address } from '../../../constant'
+import { fetchItemQuery, fetchSectionQuery, getOwner } from '../../queries/queries'
+import { addSectionMutation,addItemMutation } from '../../mutation/mutations'
+import { withApollo } from 'react-apollo';
 
 class MenuOwner extends Component {
     constructor(props) {
@@ -16,7 +17,7 @@ class MenuOwner extends Component {
             addItem: false,
             editItem: false,
             editSection: false,
-            deleteItem:false,
+            deleteItem: false,
             displayItem: true,
             sectionName: "",
             sectionId: "",
@@ -29,8 +30,8 @@ class MenuOwner extends Component {
             itemPrice: "",
             itemSection: "",
             itemId: "",
-            filePreview:null,
-            file:null,
+            filePreview: null,
+            file: null,
             itemForSection: [],
             itemsPresent: [],
             errorMessage: []
@@ -46,59 +47,55 @@ class MenuOwner extends Component {
         this.addItemHandler = this.addItemHandler.bind(this);
         this.fetchItemsforSection = this.fetchItemsforSection.bind(this);
         this.modalCloseSection = this.modalCloseSection.bind(this);
-        this.pictureChangeHandler=this.pictureChangeHandler.bind(this)
 
     }
-    pictureChangeHandler =(event)=>{
-        if(event.target.files[0]){
-            this.setState({
-                file: event.target.files[0],
-                filePreview: URL.createObjectURL(event.target.files[0])
-            });
-        }
-    }
+
     promiseGetSections = () => {
         return new Promise((resolve, reject) => {
 
-            axios.get(address+'/section/' + this.state.restaurantId)
-                .then(response => {
-                    if (response.status === 200) {
-                        this.setState({
-                            sectionsPresent: response.data
-                        })
-                        resolve();
-                    }
+            this.props.client.query({
+                query: fetchSectionQuery,
+                variables: {
+                    restaurantId: parseInt(this.state.restaurantId)
+                }
+            }).then((response) => {
+                this.setState({
+                    sectionsPresent: response.data.section
                 })
+            })
 
         })
     }
     promiseGetItems = () => {
         return new Promise((resolve, reject) => {
-
-            axios.get(address+'/item/' + this.state.restaurantId)
-                .then(response => {
-                    if (response.status === 200) {
-                        this.setState({
-                            itemsPresent: response.data
-                        })
-                        resolve();
-                    }
+            this.props.client.query({
+                query: fetchItemQuery,
+                variables: {
+                    restaurantId: parseInt(this.state.restaurantId)
+                }
+            }).then((response) => {
+                this.setState({
+                    itemsPresent: response.data.item
                 })
-
+            })
         })
     }
     promiseGetRestDetails = () => {
         return new Promise((resolve, reject) => {
-            axios.get(address+'/restaurant/detailsOwner/' + sessionStorage.getItem("username"))
-                .then(response => {
-                    if (response.status === 200) {
-                        this.setState({
-                            restaurantId: response.data.restaurantId
-                        })
-                        resolve();
+            this.props.client.query({
+                query: getOwner,
+                variables: {
+                    userId: sessionStorage.getItem("username")
+                }
+            }).then((response) => {
+                if (response.data.Owner) {
+                    this.setState({
+                        restaurantId: response.data.Owner.restaurantId
+                    })
+                }
+                resolve();
+            })
 
-                    }
-                })
         })
     }
     fetchItemsforSection = (e) => {
@@ -110,38 +107,7 @@ class MenuOwner extends Component {
         this.setState({ itemForSection: itemsForThisSection });
 
     }
-    updateItemHandler = (e) => {
-        var data = { itemId: this.state.itemId, itemName: this.state.itemName, itemSection: this.state.itemSection, itemPrice: this.state.itemPrice, itemDesc: this.state.itemDesc, restaurantId: this.state.restaurantId }
-        axios.put(address+"/item/", data).then(response => {
-            if (response.status === 200) {
-                this.setState({
-                    errorFlag: "Success"
-                })
-                if(this.state.file && this.state.filePreview){
-                    let formData = new FormData();
-                    formData.append('myImage',this.state.file,this.state.itemId);
-                    const config = {
-                        headers: {
-                            'content-type': 'multipart/form-data'
-                        }
-                    };
-                    axios.post(address+"/upload/ItemPhoto",formData,config)
-                        .then((response) => {
 
-                        }).catch((error) => {
-                    });
-                }
-                this.promiseGetItems();
-                this.modalClose();
-                window.location.reload()
-            } else {
-                this.setState({
-                    errorMessage: response.data,
-                    errorFlag: "Some error"
-                })
-            }
-        })
-    }
 
     componentDidMount() {
         this.promiseGetRestDetails().then(() => {
@@ -180,189 +146,64 @@ class MenuOwner extends Component {
     itemSectionChangeHandler = (e) => {
         this.setState({ itemSection: e.target.value });
     }
-    deleteItemHandler = () => {
-
-        axios.delete(address+"/item/" + this.state.itemId).then(response => {
-            if (response.status === 200) {
-                this.setState({
-                    errorFlag: "Success"
-                })
-                this.promiseGetItems();
-                this.modalClose();
-            } else {
-                this.setState({
-                    errorMessage: response.data,
-                    errorFlag: "Some error"
-                })
-            }
-        })
-    }
     modalClose = () => {
-        document.getElementById("preview").value=null
         document.getElementById("modalItem").style.display = "none";
-        
-        this.setState({ editItem: false, itemName: "", itemDesc: "", itemPrice: "", itemSection: "", addItem: false, errorFlag: "", errorMessage: [],filePreview:null });
+        this.setState({ editItem: false, itemName: "", itemDesc: "", itemPrice: "", itemSection: "", addItem: false, errorFlag: "", errorMessage: [], filePreview: null });
     }
     modalCloseSection = (e) => {
 
         document.getElementById("modalAddSection").style.display = "none";
         this.setState({ editSection: false, sectionName: "", sectionDesc: "", addSection: false, errorFlag: "", errorMessage: [] });
     }
-    modalCloseDeleteSection = (e) => {
 
-        document.getElementById("deleteSectionConfrimation").style.display = "none";
-        this.setState({ editSection: false, sectionName: "", sectionDesc: "", addSection: false, errorFlag: "", errorMessage: [] });
-    }
-    editSectionModal = (e) => {
 
-        document.getElementById("modalAddSection").style.display = "block";
-        this.state.sectionsPresent.filter((section) => {
-            if (section.menuSectionId == e.target.id) {
-                this.setState({ sectionName: section.menuSectionName, editSection: true, sectionId: e.target.id });
-                this.setState({ sectionDesc: section.menuSectionDesc });
-            }
-        })
-    }
-    editItemModal = (e) => {
 
-        document.getElementById("modalItem").style.display = "block";
-        this.state.itemsPresent.filter((item) => {
-            if (item.ItemId == e.target.id) {
-                this.setState({ itemName: item.ItemName, itemDesc: item.ItemDesc, itemPrice: item.ItemPrice, itemSection: item.SectionId, editItem: true, itemId: item.ItemId ,file:item.itemImage});
-            }
-        })
-
-    }
-    deleteSectionHandler = (e) => {
-        this.setState({deleteItem:true});
-        document.getElementById("deleteSectionConfrimation").style.display = "block";
-        document.getElementById("modalAddSection").style.display = "none";
-    }
-    updateSectionHandler = (e) => {
-        var data = { menuSectionName: this.state.sectionName, menuSectionDesc: this.state.sectionDesc, menuSectionId: this.state.sectionId }
-        axios.put(address+"/section", data).then(response => {
-            if (response.status === 200) {
-                this.setState({
-                    errorFlag: "Success"
-                })
-                this.promiseGetSections();
-                setTimeout(() => {
-                    this.modalCloseSection();
-                }, 1000);
-                
-            } else {
-                this.setState({
-                    errorMessage: response.data,
-                    errorFlag: "Some error"
-                })
-            }
-        })
-    }
-    promiseGetNewItemId =()=>{
-        axios.get(address+'/maxItemId/'+this.state.restaurantId).then((response) => {
-            if(this.state.file){
-                let formData = new FormData();
-                formData.append('myImage',this.state.file,response.data);
-                const config = {
-                    headers: {
-                        'content-type': 'multipart/form-data'
-                    }
-                };
-                axios.post(address+"/upload/ItemPhoto",formData,config)
-                    .then((response) => {
-                    }).catch((error) => {
-                });
-            }
-
-        })
-    }
     addItemHandler = (e) => {
-
-        e.preventDefault();
-        axios.defaults.withCredentials = true;
-        var data = { itemName: this.state.itemName, itemDesc: this.state.itemDesc, itemPrice: this.state.itemPrice, restaurantId: this.state.restaurantId, itemSection: this.state.itemSection }
-        axios.post(address+'/item', data).then((response) => {
-            if (response.status === 200) {
-                this.setState({
-                    errorFlag: "Success",
-                    errorMessage: []
-                })
-                if(this.state.file){
-                    this.promiseGetNewItemId();
-                }
-                
-                this.promiseGetItems();
-                this.promiseGetSections();
-                
-                setTimeout(() => {
-                    this.modalClose();
-                    window.location.reload();
-                }, 1000);
-                
-               
-
-            } else if (response.status === 201) {
-                this.setState({
-                    errorMessage: response.data,
-                    errorFlag: "Some error"
-                })
-
-            }
-
+        var data = { ItemName: this.state.itemName, ItemDesc: this.state.itemDesc, ItemPrice: parseFloat(this.state.itemPrice) , restaurantId: this.state.restaurantId, SectionId: parseInt(this.state.itemSection) }
+        this.props.client.mutate({
+            mutation:addItemMutation,
+            variables:data
+        }).then((response)=>{
+            this.setState({
+                errorFlag: "Success",
+                errorMessage: []
+            })
+    
+            setTimeout(() => {
+                this.modalClose();
+                window.location.reload();
+            }, 1000);
         })
+        
     }
 
     addSectionHandler = (e) => {
         axios.defaults.withCredentials = true;
-        var data = { sectionName: this.state.sectionName, sectionDesc: this.state.sectionDesc, restaurantId: this.state.restaurantId }
-        axios.post(address+'/section', data).then((response) => {
-            if (response.status === 200) {
+        this.props.client.mutate({
+            mutation: addSectionMutation,
+            variables: {
+                sectionName: this.state.sectionName,
+                sectionDesc: this.state.sectionDesc,
+                restaurantId: this.state.restaurantId
+            }
+        }).then((response) => {
+            if (response.data.addSection.status === 200) {
                 this.setState({
                     errorFlag: "Success",
                     errorMessage: []
                 })
-                this.promiseGetSections();
                 setTimeout(() => {
                     this.modalCloseSection();
+                    window.location.reload();
                 }, 1000);
-                
-
-            } else if (response.status === 201) {
-                this.setState({
-                    errorMessage: response.data,
-                    errorFlag: "Some error"
-                })
-
-            }
-
-        })
-
-    }
-
-    deleteItemPlusSection=(e)=>{
-        axios.delete(address+"/section/" + this.state.sectionId).then(response => {
-            if (response.status === 200) {
-                this.setState({
-                    errorFlag: "Success"
-                })
-                this.promiseGetSections();
-
-                this.modalCloseDeleteSection();
-
-            } else {
-                this.setState({
-                    errorMessage: response.data,
-                    errorFlag: "Some error"
-                })
             }
         })
     }
+
     render() {
 
-
-
         var redirectVar = "";
-        var image="";
+        var image = "";
         if (!cookie.load('cookie')) {
             redirectVar = <Redirect to="/LoginOwner" />
         }
@@ -372,12 +213,12 @@ class MenuOwner extends Component {
                 return (<li class="list-group-item" style={{ color: "black", fontSize: '16px', background: "#d9d9d9", fontWeight: "bolder" }} value={sections.menuSectionId} onClick={this.displayItemChangeHandler}>{sections.menuSectionName}<span class="badge badge-default badge-pill">{sections.count}</span></li>)
             })
         )
-        var itemsToDelete="";
-        
-        if(this.state.deleteItem==true){
-            itemsToDelete=this.state.itemsPresent.map((item)=>{
-                if(this.state.sectionId==item.SectionId){
-                    return(<li>{item.ItemName}</li>)
+        var itemsToDelete = "";
+
+        if (this.state.deleteItem == true) {
+            itemsToDelete = this.state.itemsPresent.map((item) => {
+                if (this.state.sectionId == item.SectionId) {
+                    return (<li>{item.ItemName}</li>)
                 }
             })
         }
@@ -415,14 +256,14 @@ class MenuOwner extends Component {
                 <div class="col-md-4"><button type="button" onClick={this.updateItemHandler} class="btn btn-success btn-md">Update Item</button></div>
             </div>)
             ItemHeading = "Edit Item"
-            if(this.state.filePreview){
-                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage" id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "50%" }} src={this.state.filePreview}  class="rounded"/></div></div>)
+            if (this.state.filePreview) {
+                image = (<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name="myImage" id="preview" class="custom-file-input" /><div class="img" style={{ paddingTop: '20px' }}><img style={{ width: "50%" }} src={this.state.filePreview} class="rounded" /></div></div>)
 
-            }else if(this.state.file){
-                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage"id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "50%" }} src={this.state.file}  class="rounded"/></div></div>)
+            } else if (this.state.file) {
+                image = (<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name="myImage" id="preview" class="custom-file-input" /><div class="img" style={{ paddingTop: '20px' }}><img style={{ width: "50%" }} src={this.state.file} class="rounded" /></div></div>)
 
-            }else{
-                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage"id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "50%" }} src="//placehold.it/500x300"  class="rounded"/></div></div>)
+            } else {
+                image = (<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name="myImage" id="preview" class="custom-file-input" /><div class="img" style={{ paddingTop: '20px' }}><img style={{ width: "50%" }} src="//placehold.it/500x300" class="rounded" /></div></div>)
 
             }
         } else {
@@ -434,13 +275,6 @@ class MenuOwner extends Component {
                 <div class="col-md-4"></div>
             </div>)
             ItemHeading = "Add Item"
-            if(this.state.filePreview){
-                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage" id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "80%" }} src={this.state.filePreview}  class="rounded"/></div></div>)
-
-            }else{
-                image=(<div><input type="file" accept="image/*" onChange={this.pictureChangeHandler} name ="myImage"id="preview" class="custom-file-input"/><div class="img" style={{paddingTop:'20px'}}><img style={{ width: "80%" }} src="//placehold.it/500x300"  class="rounded"/></div></div>)
-
-            }
         }
 
         if (this.state.sectionsPresent.length) {
@@ -448,7 +282,7 @@ class MenuOwner extends Component {
                 var flag = 0;
                 array.push(<div>
                     <div class="row" style={{ fontSize: "20px", fontWeight: "900" }}>
-                    <div class="col-md-1" style={{textAlign:'right'}}><span class="glyphicon glyphicon-pencil" id={section.menuSectionId} onClick={this.editSectionModal}></span> </div>
+                        <div class="col-md-1" style={{ textAlign: 'right' }}><span class="glyphicon glyphicon-pencil" id={section.menuSectionId} onClick={this.editSectionModal}></span> </div>
                         <div class="col-md-11" style={{ alignItems: "right" }}>{section.menuSectionName} </div>
                     </div>
                     <br></br>
@@ -458,9 +292,9 @@ class MenuOwner extends Component {
                     if (item.SectionId == section.menuSectionId) {
                         flag = 1;
                         array.push(
-                            <div class="row embossed-heavy" style={{ marginLeft: '10px', marginRight: '200px', marginBottom: '10px', paddingBottom: '10px', fontWeight: 'bold', backgroundColor: 'white',paddingTop:'10px' }}>
+                            <div class="row embossed-heavy" style={{ marginLeft: '10px', marginRight: '200px', marginBottom: '10px', paddingBottom: '10px', fontWeight: 'bold', backgroundColor: 'white', paddingTop: '10px' }}>
                                 <span class="border border-dark">
-                                    <div class="col-md-5"><img style={{ width: "50%" }} src={item.itemImage}  class="rounded"/></div>
+                                    <div class="col-md-5"><img style={{ width: "50%" }} src={item.itemImage} class="rounded" /></div>
                                     <div class="col-md-5">
                                         <div class="row" style={{ fontSize: "15px", fontWeight: "600", color: "blue" }}>
                                             <p onClick={this.editItemModal} id={item.ItemId}>{item.ItemName}</p></div>
@@ -514,7 +348,7 @@ class MenuOwner extends Component {
 
                 }))
         }
-        
+
         return (
             <div>
                 {redirectVar}
@@ -571,25 +405,21 @@ class MenuOwner extends Component {
                                             <div class="row">Description</div>
                                             <div class="row signup" style={{ paddingBottom: "15px" }}><input value={this.state.itemDesc} onChange={this.itemDescChangeHandler} type="text" class="form-control" name="itemDesc" /></div>
                                         </div>
-                                    {/* </div> */}
-                                    {/* <div class="col-md-6">{image}</div> */}
-                                {/* </div> */}
-                                {/* <div class="row" style={{ paddingLeft: "25px" }}> */}
-                                <div class="row">
-                                    <div class="row" style={{ paddingBottom: "5px" }}>
-                                        Sections
+                                        <div class="row">
+                                            <div class="row" style={{ paddingBottom: "5px" }}>
+                                                Sections
                                 </div>
-                                    <div class="row" style={{ paddingBottom: "15px" }}>
-                                        <select onChange={this.itemSectionChangeHandler}>
-                                            <option value={0}>select</option>
-                                            {addDropDown}
-                                        </select>
+                                            <div class="row" style={{ paddingBottom: "15px" }}>
+                                                <select onChange={this.itemSectionChangeHandler}>
+                                                    <option value={0}>select</option>
+                                                    {addDropDown}
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
-                                    </div>
-                                </div>
 
 
-                                <div class="col-md-6">{image}</div>
+                                    <div class="col-md-6">{image}</div>
                                 </div>
                                 <div class="row" style={{ paddingLeft: "25px", paddingRight: "25px" }}>
                                     <div class="row" style={{ paddingBottom: "5px" }}>
@@ -674,7 +504,7 @@ class MenuOwner extends Component {
                             </div>
 
                             <div class="modal-body">
-{itemsToDelete}
+                                {itemsToDelete}
 
                             </div>
 
@@ -700,4 +530,4 @@ class MenuOwner extends Component {
     }
 }
 //export Login Component
-export default MenuOwner;
+export default withApollo(MenuOwner);

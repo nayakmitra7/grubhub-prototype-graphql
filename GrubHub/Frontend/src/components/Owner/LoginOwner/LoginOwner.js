@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 import '../../../App.css';
-import axios from 'axios';
 import cookie from 'react-cookies';
 import {Redirect} from 'react-router';
-import {address} from '../../../constant'
-
+import { withApollo } from 'react-apollo';
+import { getOwner } from '../../queries/queries'
+import { loginOwnerMutation } from '../../mutation/mutations';
 class LoginOwner extends Component{
     constructor(props){
         super(props);
@@ -34,17 +34,18 @@ class LoginOwner extends Component{
         })
     }
     fetchDetails = (username)=>{
-        axios.get(address+'/restaurant/detailsOwner/'+username)
-        .then(response => {
-            if(response.status === 200){
-                sessionStorage.setItem("OwnerFirstName",response.data.ownerFirstName);
-                sessionStorage.setItem("RestaurantId",response.data.restaurantId)
-                sessionStorage.setItem("RestaurantName",response.data.restaurantName)
-
-                return Promise.resolve();
+        this.props.client.query({
+            query: getOwner,
+            variables: {
+                userId: username
             }
-          
-        });
+        }).then((response) => {
+            if(response.data.Owner){
+                sessionStorage.setItem("OwnerFirstName",response.data.Owner.ownerFirstName);
+                sessionStorage.setItem("RestaurantId",response.data.Owner.restaurantId)
+                sessionStorage.setItem("RestaurantName",response.data.Owner.restaurantName)
+            }
+        })
     }
     submitLogin = (e) => {
         e.preventDefault();
@@ -52,23 +53,29 @@ class LoginOwner extends Component{
             username : this.state.username,
             password : this.state.password
         }
-        this.fetchDetails(this.state.username);
-        axios.defaults.withCredentials = true;
-        axios.post(address+'/restaurant/login',data)
-            .then(response => {
-                if(response.status === 200){
-                    this.setState({
-                        authFlag : true
-                    })
-                sessionStorage.setItem("username",this.state.username);
-                }
-                else if(response.status === 201){
-                    this.setState({
-                        authFlag : false,
-                        errorMessage : response.data
-                    })
-                }
-            });
+        this.props.client.mutate({
+            mutation: loginOwnerMutation,
+            variables: {
+                email: this.state.username,
+                password: this.state.password
+            }
+        }).then((response) => {
+            if (response.data.loginOwner.status === 200) {
+                this.fetchDetails(this.state.username)
+                sessionStorage.setItem("username", this.state.username);
+                cookie.save('cookie', 'admin', { path: '/' });
+                this.setState({
+                    authFlag: true
+                })
+            }
+            else {
+                this.setState({
+                    authFlag: false,
+                    errorMessage: [response.data.loginOwner.msg]
+                })
+            }
+        })
+        
     }
 
     render(){
@@ -79,7 +86,7 @@ class LoginOwner extends Component{
         let displayMessage = null;
         if(this.state.authFlag==false){
             displayMessage = ( this.state.errorMessage.map( (error) =>{
-                return (<ul class="li alert-danger">{error.msg}</ul>)
+                return (<ul class="li alert-danger">{error}</ul>)
             }))
         }
         return(
@@ -114,4 +121,4 @@ class LoginOwner extends Component{
     }
 }
 //export Login Component
-export default LoginOwner;
+export default withApollo(LoginOwner);
