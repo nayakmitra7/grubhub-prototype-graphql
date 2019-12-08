@@ -168,7 +168,7 @@ class DetailsPage extends Component {
     promiseGetItems = () => {
         return new Promise((resolve, reject) => {
 
-            axios.get(address+'/items/' + this.state.restaurantId)
+            axios.get(address+'/item/' + this.state.restaurantId)
                 .then(response => {
                     if (response.status === 200) {
                         this.setState({

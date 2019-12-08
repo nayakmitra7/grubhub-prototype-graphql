@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import cookie from 'react-cookies';
 import axios from 'axios';
+import { withApollo } from 'react-apollo';
 import { Redirect } from 'react-router';
 import { address } from '../../../constant';
 import '../../../App.css';
-
+import { getBuyer } from '../../queries/queries'
+import {updateBuyerMutation} from '../../mutation/mutations'
 
 class UpdateDetails extends Component {
     constructor(props) {
@@ -12,7 +14,7 @@ class UpdateDetails extends Component {
         this.state = {
             firstName: "",
             lastName: "",
-            email: "",
+            email: sessionStorage.getItem("username"),
             file: null,
             phone: "",
             filePreview: null,
@@ -21,7 +23,7 @@ class UpdateDetails extends Component {
             readOnly: true,
             ID: "",
             errorFlag: "No update",
-            address: ""
+            address: "",
         }
         this.firstNameChangeHandler = this.firstNameChangeHandler.bind(this);
         this.lastNameChangeHandler = this.lastNameChangeHandler.bind(this);
@@ -33,34 +35,23 @@ class UpdateDetails extends Component {
         this.uploadImageHandler = this.uploadImageHandler.bind(this)
 
     }
-
-
-    componentDidMount() {
-        axios.get(address+'/Details/' + sessionStorage.getItem("username"))
-            .then(response => {
-                if (response.status === 200) {
-                    this.setState({
-                        firstName: response.data.buyerFirstName,
-                        lastName: response.data.buyerLastName,
-                        email: response.data.buyerEmail,
-                        phone: response.data.buyerPhone,
-                        image: response.data.buyerImage,
-                        ID: response.data.buyerID,
-                        address: response.data.buyerAddress
-                    })
-                    axios.get(address+"/photo/" + response.data.buyerID).then(responses => {
-                        this.setState({
-                            file: responses.data.buyerImage
-                        })
-                    })
-                }
-                else if (response.status === 201) {
-                    this.setState({
-                        errorFlag: "Some error",
-                        errorMessage: response.data
-                    })
-                }
-            });
+    componentDidMount(){
+        this.props.client.query({
+            query: getBuyer,
+            variables: {
+                userId: this.state.email
+            }
+        }).then((response)=>{
+            this.setState({
+                firstName: response.data.buyer.buyerFirstName,
+                lastName: response.data.buyer.buyerLastName,
+                email: response.data.buyer.buyerEmail,
+                phone: response.data.buyer.buyerPhone,
+                image: response.data.buyer.buyerImage,
+                ID: response.data.buyer.buyerID,
+                address: response.data.buyer.buyerAddress
+            })
+        })
     }
     uploadImageHandler = (e) => {
         if (this.state.file) {
@@ -72,12 +63,12 @@ class UpdateDetails extends Component {
                     'content-type': 'multipart/form-data'
                 }
             };
-            axios.post(address+"/upload/photo", formData, config)
+            axios.post(address + "/upload/photo", formData, config)
                 .then((response) => {
-                   this.setState({errorFlag:'Success'})
-                   setTimeout(() => {
-                       this.setState({errorFlag:''})
-                   }, 2000);
+                    this.setState({ errorFlag: 'Success' })
+                    setTimeout(() => {
+                        this.setState({ errorFlag: '' })
+                    }, 2000);
                 }).catch((error) => {
                 });
         }
@@ -132,31 +123,40 @@ class UpdateDetails extends Component {
         const data = { firstName: this.state.firstName, lastName: this.state.lastName, email: this.state.email, phone: this.state.phone, ID: this.state.ID, address: this.state.address };
         axios.defaults.withCredentials = true;
 
-        if (this.state.readOnly == false) {
-            axios.post(address+'/updateBuyer', data)
-                .then(response => {
-                    if (response.status === 200) {
-                        sessionStorage.setItem("FirstName", this.state.firstName)
-                        var bag = localStorage.getItem(sessionStorage.getItem("username")) ? JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))) : []
-                        sessionStorage.setItem("username", this.state.email);
-                        localStorage.setItem(sessionStorage.getItem("username"), JSON.stringify(bag));
+        if (this.state.readOnly == false && this.state.firstName.length && this.state.lastName.length && this.state.email.length && this.state.address.length && this.state.phone.length==10) {
+            this.props.client.mutate({
+                mutation:updateBuyerMutation,
+                variables:{
+                    firstName:this.state.firstName,
+                    lastName:this.state.lastName,
+                    email:this.state.email,
+                    address:this.state.address,
+                    phone:this.state.phone,
+                    ID:this.state.ID
 
-                        this.setState({
-                            errorFlag: "Success"
-                        })
+                }
+            }).then((response)=>{
+               if(response.data.update.status === 200){
+                sessionStorage.setItem("FirstName", this.state.firstName)
+                var bag = localStorage.getItem(sessionStorage.getItem("username")) ? JSON.parse(localStorage.getItem(sessionStorage.getItem("username"))) : []
+                sessionStorage.setItem("username", this.state.email);
+                localStorage.setItem(sessionStorage.getItem("username"), JSON.stringify(bag));
 
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 500);
+                this.setState({
+                    errorFlag: "Success"
+                })
 
-                    }
-                    else if (response.status === 201) {
-                        this.setState({
-                            errorFlag: "Some error",
-                            errorMessage: response.data
-                        })
-                    }
-                });
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+
+               }else{
+                this.setState({
+                    errorFlag: "Some error",
+                    errorMessage: [response.data.update.msg]
+                })
+               }
+            })
         }
     }
 
@@ -164,13 +164,13 @@ class UpdateDetails extends Component {
         let redirectVar = null;
         let image = <div class="img" style={{ paddingTop: '20px' }}><img style={{ width: "80%" }} src="//placehold.it/5000x3000" class="img-circle" /></div>
         let uploadImage = ""
-        if (!cookie.load('cookie')) {
-            redirectVar = <Redirect to="/login" />
-        }
+         if (!cookie.load('cookie')) {
+             redirectVar = <Redirect to="/login" />
+         }
         let messageDisplay = "";
         if (this.state.errorFlag == "Some error") {
             messageDisplay = (this.state.errorMessage.map((error) => {
-                return (<li class=" li alert-danger">{error.msg}</li>)
+                return (<li class=" li alert-danger">{error}</li>)
             }))
         } else if (this.state.errorFlag == "Success") {
             messageDisplay = (<ul class="li alert alert-success">Successfully Updated !!!</ul>);
@@ -182,7 +182,7 @@ class UpdateDetails extends Component {
 
         } else if (this.state.file) {
             image = <div class="img" style={{ paddingBottom: '20px' }}><img style={{ width: "80%" }} src={this.state.file} class="img-circle" onChange={this.pictureChangeHandler} /></div>
-        } 
+        }
         let createDisplay = (
             <div>
 
@@ -222,23 +222,23 @@ class UpdateDetails extends Component {
 
                 </div>
                 <div class="row"><button type="button" onClick={this.updateHandler} class="btn btn-success btn-lg col-md-6">Update</button></div>
-               </div>
+            </div>
         )
 
 
         return (
             <div>
+                
                 {redirectVar}
                 <div class="row" >
                     <div class="col-md-4"></div>
 
                     <div class="col-md-8">   {createDisplay}</div>
                 </div>
-                <div class="row" style={{paddingLeft:'30px',marginTop:'5px',textAlign:'center'}}> {messageDisplay}</div>
+                <div class="row" style={{ paddingLeft: '30px', marginTop: '5px', textAlign: 'center' }}> {messageDisplay}</div>
 
             </div>
         )
     }
 }
-
-export default UpdateDetails;
+export default withApollo(UpdateDetails);

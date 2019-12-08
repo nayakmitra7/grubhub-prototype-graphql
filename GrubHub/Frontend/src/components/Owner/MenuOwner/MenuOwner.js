@@ -75,7 +75,7 @@ class MenuOwner extends Component {
     promiseGetItems = () => {
         return new Promise((resolve, reject) => {
 
-            axios.get(address+'/items/' + this.state.restaurantId)
+            axios.get(address+'/item/' + this.state.restaurantId)
                 .then(response => {
                     if (response.status === 200) {
                         this.setState({
@@ -89,7 +89,7 @@ class MenuOwner extends Component {
     }
     promiseGetRestDetails = () => {
         return new Promise((resolve, reject) => {
-            axios.get(address+'/DetailsOwner/' + sessionStorage.getItem("username"))
+            axios.get(address+'/restaurant/detailsOwner/' + sessionStorage.getItem("username"))
                 .then(response => {
                     if (response.status === 200) {
                         this.setState({
@@ -112,7 +112,7 @@ class MenuOwner extends Component {
     }
     updateItemHandler = (e) => {
         var data = { itemId: this.state.itemId, itemName: this.state.itemName, itemSection: this.state.itemSection, itemPrice: this.state.itemPrice, itemDesc: this.state.itemDesc, restaurantId: this.state.restaurantId }
-        axios.put(address+"/items/", data).then(response => {
+        axios.put(address+"/item/", data).then(response => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success"
@@ -182,7 +182,7 @@ class MenuOwner extends Component {
     }
     deleteItemHandler = () => {
 
-        axios.delete(address+"/items/" + this.state.itemId).then(response => {
+        axios.delete(address+"/item/" + this.state.itemId).then(response => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success"
@@ -240,7 +240,7 @@ class MenuOwner extends Component {
     }
     updateSectionHandler = (e) => {
         var data = { menuSectionName: this.state.sectionName, menuSectionDesc: this.state.sectionDesc, menuSectionId: this.state.sectionId }
-        axios.put(address+"/sections/", data).then(response => {
+        axios.put(address+"/section", data).then(response => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success"
@@ -340,7 +340,7 @@ class MenuOwner extends Component {
     }
 
     deleteItemPlusSection=(e)=>{
-        axios.delete(address+"/sections/" + this.state.sectionId).then(response => {
+        axios.delete(address+"/section/" + this.state.sectionId).then(response => {
             if (response.status === 200) {
                 this.setState({
                     errorFlag: "Success"

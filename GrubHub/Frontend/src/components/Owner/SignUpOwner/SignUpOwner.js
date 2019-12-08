@@ -72,7 +72,7 @@ class SignUpOwner extends Component {
         axios.defaults.withCredentials = true;
 
         var data = { firstName: this.state.firstName, lastName: this.state.lastName, phone: this.state.phone, email: this.state.email, restaurant: this.state.restaurant, zipcode: this.state.zipCode, password: this.state.password }
-        axios.post(address+"/SignUpOwner", data)
+        axios.post(address+"/restaurant/signup", data)
             .then((response) => {
                 if (response.status === 200) {
                     sessionStorage.setItem("OwnerFirstName",this.state.firstName)

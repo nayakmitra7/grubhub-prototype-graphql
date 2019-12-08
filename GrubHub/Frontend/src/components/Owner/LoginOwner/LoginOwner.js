@@ -34,7 +34,7 @@ class LoginOwner extends Component{
         })
     }
     fetchDetails = (username)=>{
-        axios.get(address+'/DetailsOwner/'+username)
+        axios.get(address+'/restaurant/detailsOwner/'+username)
         .then(response => {
             if(response.status === 200){
                 sessionStorage.setItem("OwnerFirstName",response.data.ownerFirstName);
@@ -54,7 +54,7 @@ class LoginOwner extends Component{
         }
         this.fetchDetails(this.state.username);
         axios.defaults.withCredentials = true;
-        axios.post(address+'/loginOwner',data)
+        axios.post(address+'/restaurant/login',data)
             .then(response => {
                 if(response.status === 200){
                     this.setState({

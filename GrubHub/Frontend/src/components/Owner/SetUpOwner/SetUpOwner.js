@@ -41,7 +41,7 @@ class SetUpOwner extends Component {
 
     componentDidMount() {
         var data = ""
-        axios.get(address + '/DetailsOwner/' + sessionStorage.getItem("username"))
+        axios.get(address + '/restaurant/detailsOwner/' + sessionStorage.getItem("username"))
             .then(response => {
                 if (response.status === 200) {
                     this.setState({
@@ -63,7 +63,7 @@ class SetUpOwner extends Component {
             }).then(() => {
                 if (this.state.restaurantId) {
                     data = this.state.restaurantId;
-                    axios.get(address + '/DetailsRestaurant/' + data).then((responses) => {
+                    axios.get(address + '/restaurant/detailsRestaurant/' + data).then((responses) => {
                         this.setState({
                             restaurantName: responses.data.restaurantName,
                             restaurantCuisine: responses.data.restaurantCuisine,
@@ -125,7 +125,7 @@ class SetUpOwner extends Component {
         const data = { firstName: this.state.firstName, lastName: this.state.lastName, email: this.state.email, phone: this.state.phone, ownerId: this.state.ownerId, restaurantId: this.state.restaurantId, restaurantName: this.state.restaurantName, restaurantAddress: this.state.restaurantAddress, restaurantCuisine: this.state.restaurantCuisine, restaurantZipCode: this.state.restaurantZipCode };
 
         return new Promise((resolve, reject) => {
-            axios.post(address + '/UpdateOwner', data)
+            axios.post(address + '/restaurant/updateOwner', data)
                 .then(response => {
                     if (response.status === 201) {
                         this.setState({
@@ -151,7 +151,7 @@ class SetUpOwner extends Component {
 
         if (this.state.readOnly == false) {
             this.promise1().then(() => {
-                axios.post(address + '/UpdateRestaurant', restData)
+                axios.post(address + '/restaurant/updateRestaurant', restData)
                     .then(response => {
                         sessionStorage.setItem("OwnerFirstName", this.state.firstName)
                         sessionStorage.setItem("RestaurantName", this.state.restaurantName)

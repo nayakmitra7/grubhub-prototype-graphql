@@ -29,7 +29,7 @@ class SearchPage extends Component {
     itemSearch = () => {
         if (this.state.itemSearched.length) {
             this.setState({ itemToPrint: this.state.itemSearched, filterFlag: false })
-            axios.get(address+'/RestaurantSearched/' + this.state.itemSearched)
+            axios.get(address+'/restaurant/restaurantSearched/' + this.state.itemSearched)
                 .then(response => {
                     if (response.status === 200) {
                         this.setState({

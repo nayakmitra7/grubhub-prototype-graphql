@@ -11,10 +11,6 @@ import HomeOwner from './Owner/HomeOwner/HomeOwner';
 import HomePage from './Buyer/HomePage/HomePage'
 import SearchPage from './Buyer/SearchPage/SearchPage'
 import DetailsPage from './Buyer/DetailsPage/DetailsPage'
-import ReviewPage from './Buyer/ReviewPage/ReviewPage'
-import UpcomingOrder from './Buyer/UpcomingOrder/UpcomingOrder'
-import PastOrder from './Buyer/PastOrder/PastOrder'
-import PastOrderOwner from './Owner/PastOrderOwner/PastOrderOwner'
 import SetUpOwner from './Owner/SetUpOwner/SetUpOwner'
 
 class Main extends Component {
@@ -33,10 +29,6 @@ class Main extends Component {
                 <Route path="/HomePage" component={HomePage}/>
                 <Route path="/SearchPage" component={SearchPage}/>
                 <Route path="/DetailsPage" component={DetailsPage}/>
-                <Route path="/ReviewPage" component={ReviewPage}/>
-                <Route path="/UpcomingOrder" component={UpcomingOrder}/>
-                <Route path="/PastOrder" component={PastOrder}/>
-                <Route path="/PastOrderOwner" component={PastOrderOwner}/>
                 <Route path="/SetUpOwner" component={SetUpOwner}/>
 
                 

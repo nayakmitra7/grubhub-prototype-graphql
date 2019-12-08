@@ -55,7 +55,7 @@ class signup extends Component {
         axios.defaults.withCredentials = true;
 
         var data = { firstName: this.state.firstName, lastName: this.state.lastName, password: this.state.password, email: this.state.email, address: this.state.address }
-        axios.post(address+"/signup", data)
+        axios.post(address+"/buyer/signup", data)
             .then((response) => {
                 sessionStorage.setItem("username",this.state.email)
                 sessionStorage.setItem("FirstName",this.state.firstName)

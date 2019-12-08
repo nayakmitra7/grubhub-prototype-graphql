@@ -4,8 +4,7 @@ import cookie from 'react-cookies';
 import axios from 'axios';
 import { Redirect } from 'react-router';
 import {address} from '../../../constant'
-
-
+import { withApollo } from 'react-apollo';
 
 class HomePage extends Component {
     constructor(props){
@@ -19,7 +18,7 @@ class HomePage extends Component {
        
     }
     componentDidMount=(e)=>{
-        axios.get(address+'/Details/'+sessionStorage.getItem("username"))
+        axios.get(address+'/buyer/details/'+sessionStorage.getItem("username"))
         .then(response => {
             if(response.status === 200){
                 sessionStorage.setItem("Address",response.data.buyerAddress);
@@ -74,5 +73,5 @@ class HomePage extends Component {
     }
 }
 
-export default HomePage;
+export default withApollo(HomePage);
 
