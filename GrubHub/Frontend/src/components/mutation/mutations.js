@@ -33,7 +33,14 @@ const signupBuyerMutation = gql`
         }
     }
 `;
-
+const signupOwnerMutation = gql`
+    mutation SignupOwner($firstName: String!, $lastName: String!, $email: String!, $phone: String!,$password: String!,$zipcode: Int!,$restaurant: String!){
+        signupOwner(firstName: $firstName, lastName: $lastName, email: $email, phone: $phone,password:$password,zipcode:$zipcode,restaurant:$restaurant){
+            status
+            msg
+        }
+    }
+`;
 const updateRestaurantMutation = gql`
     mutation UpdateRestaurant($restaurantName: String!, $restaurantCuisine: String!, $restaurantAddress: String!, $restaurantZipCode: Int!, $restaurantId: Int!){
         updateRestaurant(restaurantName: $restaurantName, restaurantCuisine: $restaurantCuisine, restaurantAddress: $restaurantAddress, restaurantZipCode: $restaurantZipCode,restaurantId: $restaurantId){
@@ -67,4 +74,4 @@ const addItemMutation = gql`
     }
 `;
 
-export {addItemMutation,addSectionMutation,loginBuyerMutation,updateBuyerMutation,signupBuyerMutation,loginOwnerMutation,updateRestaurantMutation,updateOwnerMutation};
+export {signupOwnerMutation, addItemMutation,addSectionMutation,loginBuyerMutation,updateBuyerMutation,signupBuyerMutation,loginOwnerMutation,updateRestaurantMutation,updateOwnerMutation};

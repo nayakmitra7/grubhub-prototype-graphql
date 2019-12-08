@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import cookie from 'react-cookies';
-import axios from 'axios';
 import { Redirect } from 'react-router';
-import { address } from '../../../constant';
 import '../../../App.css';
-
+import { withApollo } from 'react-apollo';
+import { getOwner,fetchRestaurantQuery } from '../../queries/queries'
+import { updateOwnerMutation,updateRestaurantMutation } from '../../mutation/mutations';
 class SetUpOwner extends Component {
     constructor(props) {
         super(props);
@@ -40,39 +40,39 @@ class SetUpOwner extends Component {
 
 
     componentDidMount() {
-        var data = ""
-        axios.get(address + '/restaurant/detailsOwner/' + sessionStorage.getItem("username"))
-            .then(response => {
-                if (response.status === 200) {
-                    this.setState({
-                        firstName: response.data.ownerFirstName,
-                        lastName: response.data.ownerLastName,
-                        email: response.data.ownerEmail,
-                        phone: response.data.ownerPhone,
-                        image: response.data.ownerImage,
-                        ownerId: response.data.ownerId,
-                        restaurantId: response.data.restaurantId
-                    })
-                    sessionStorage.setItem("RestaurantId", this.state.restaurantId)
-                } else if (response.status === 201) {
-                    this.setState({
-                        errorFlag: "Some error",
-                        errorMessage: response.data
-                    })
-                }
-            }).then(() => {
-                if (this.state.restaurantId) {
-                    data = this.state.restaurantId;
-                    axios.get(address + '/restaurant/detailsRestaurant/' + data).then((responses) => {
+        this.props.client.query({
+            query: getOwner,
+            variables: {
+                userId: sessionStorage.getItem("username")
+            }
+        }).then((response) => {
+            if (response.data.Owner) {
+                this.setState({
+                    firstName: response.data.Owner.ownerFirstName,
+                    lastName: response.data.Owner.ownerLastName,
+                    email: response.data.Owner.ownerEmail,
+                    phone: response.data.Owner.ownerPhone,
+                    ownerId: response.data.Owner.ownerId,
+                    restaurantId: response.data.Owner.restaurantId
+                })
+                sessionStorage.setItem("RestaurantId", response.data.Owner.restaurantId)
+                if (response.data.Owner.restaurantId) {
+                    this.props.client.query({
+                        query: fetchRestaurantQuery,
+                        variables: { restaurantId: parseInt(response.data.Owner.restaurantId) }
+                    }).then((responses) => {
                         this.setState({
-                            restaurantName: responses.data.restaurantName,
-                            restaurantCuisine: responses.data.restaurantCuisine,
-                            restaurantAddress: responses.data.restaurantAddress,
-                            restaurantZipCode: responses.data.restaurantZipCode
+                            restaurantName: responses.data.restaurant.restaurantName,
+                            restaurantCuisine: responses.data.restaurant.restaurantCuisine != null ? responses.data.restaurant.restaurantCuisine : "",
+                            restaurantAddress: responses.data.restaurant.restaurantAddress,
+                            restaurantZipCode: responses.data.restaurant.restaurantZipCode
                         })
                     })
                 }
-            })
+            }
+
+        })
+
     }
 
     firstNameChangeHandler = (e) => {
@@ -120,61 +120,54 @@ class SetUpOwner extends Component {
             restaurantZipCode: e.target.value
         })
     }
-
     promise1 = () => {
-        const data = { firstName: this.state.firstName, lastName: this.state.lastName, email: this.state.email, phone: this.state.phone, ownerId: this.state.ownerId, restaurantId: this.state.restaurantId, restaurantName: this.state.restaurantName, restaurantAddress: this.state.restaurantAddress, restaurantCuisine: this.state.restaurantCuisine, restaurantZipCode: this.state.restaurantZipCode };
-
         return new Promise((resolve, reject) => {
-            axios.post(address + '/restaurant/updateOwner', data)
-                .then(response => {
-                    if (response.status === 201) {
-                        this.setState({
-                            errorFlag: "Some error",
-                            errorMessage: response.data
-                        })
-                        reject();
-                    }
-                    else if (response.status === 200) {
-                        resolve();
-                    }
-                })
+            this.props.client.mutate({
+                mutation: updateOwnerMutation,
+                variables: {
+                    firstName: this.state.firstName,
+                    lastName: this.state.lastName,
+                    email: this.state.email,
+                    phone: this.state.phone,
+                    ownerId: this.state.ownerId
+
+                }
+            }).then(() => {
+                resolve();
+            })
         })
     }
     updateHandler = (e) => {
-        e.preventDefault();
-        axios.defaults.withCredentials = true;
         var Cuisine = "";
         if (this.state.restaurantCuisine) {
             Cuisine = this.state.restaurantCuisine
         }
-        var restData = { restaurantId: this.state.restaurantId, restaurantName: this.state.restaurantName, restaurantAddress: this.state.restaurantAddress, restaurantCuisine: Cuisine, restaurantZipCode: this.state.restaurantZipCode }
 
         if (this.state.readOnly == false) {
             this.promise1().then(() => {
-                axios.post(address + '/restaurant/updateRestaurant', restData)
-                    .then(response => {
-                        sessionStorage.setItem("OwnerFirstName", this.state.firstName)
-                        sessionStorage.setItem("RestaurantName", this.state.restaurantName)
-                        if (response.status === 200) {
-                            this.setState({
-                                errorFlag: "Success",
-                                readOnly: true
-                            })
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 500);
+                this.props.client.mutate({
+                    mutation: updateRestaurantMutation,
+                    variables: {
+                        restaurantId: this.state.restaurantId,
+                        restaurantName: this.state.restaurantName,
+                        restaurantAddress: this.state.restaurantAddress,
+                        restaurantCuisine: this.state.restaurantCuisine,
+                        restaurantZipCode: parseInt(this.state.restaurantZipCode)
 
-                        }
-                        else if (response.status === 201) {
-                            this.setState({
-                                errorFlag: "Some error",
-                                errorMessage: response.data,
-                            })
-                        }
-                    });
+                    }
+                }).then(() => {
+                    sessionStorage.setItem("OwnerFirstName", this.state.firstName)
+                    sessionStorage.setItem("RestaurantName", this.state.restaurantName)
+                    this.setState({
+                        errorFlag: "Success",
+                        readOnly: true
+                    })
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                })
 
             })
-
         }
     }
     render() {
@@ -198,7 +191,7 @@ class SetUpOwner extends Component {
 
         let createDisplay = (
             <div >
-                <div class="row" style={{paddingTop:'10px'}}>
+                <div class="row" style={{ paddingTop: '10px' }}>
                     <div class="row">
                         <div class="col-md-4">First Name </div>
                         <div class="col-md-4">Last Name</div>
@@ -208,7 +201,7 @@ class SetUpOwner extends Component {
                         <div class="col-md-4"><input value={this.state.lastName} onChange={this.lastNameChangeHandler} type="text" class="form-control" name="lastName" readOnly={this.state.readOnly} /></div>
                     </div>
                 </div>
-                <div class="row" style={{paddingTop:'10px'}}>
+                <div class="row" style={{ paddingTop: '10px' }}>
                     <div class="row">
                         <div class="col-md-6"> Email </div>
                     </div>
@@ -216,7 +209,7 @@ class SetUpOwner extends Component {
                         <div class="col-md-4"><input onChange={this.emailChangeHandler} value={this.state.email} type="text" class="form-control email" name="email" readOnly={this.state.readOnly} /></div>
                     </div>
                 </div>
-                <div class="row" style={{paddingTop:'10px'}}>
+                <div class="row" style={{ paddingTop: '10px' }}>
                     <div class="row">
                         <div class="col-md-6"> Phone </div>
                     </div>
@@ -224,7 +217,7 @@ class SetUpOwner extends Component {
                         <div class="col-md-4"><input onChange={this.phoneChangeHandler} value={this.state.phone} type="text" class="form-control email" name="phone" readOnly={this.state.readOnly} /></div>
                     </div>
                 </div>
-                <div class="row" style={{paddingTop:'10px'}}>
+                <div class="row" style={{ paddingTop: '10px' }}>
                     <div class="row">
                         <div class="col-md-6"> Restaurant Name </div>
                     </div>
@@ -232,7 +225,7 @@ class SetUpOwner extends Component {
                         <div class="col-md-4"><input onChange={this.restaurantNameChangeHandler} value={this.state.restaurantName} type="text" class="form-control email" name="restaurantName" readOnly={this.state.readOnly} /></div>
                     </div>
                 </div>
-                <div class="row" style={{paddingTop:'10px'}}>
+                <div class="row" style={{ paddingTop: '10px' }}>
                     <div class="row">
                         <div class="col-md-6"> Restaurant Cuisine </div>
                     </div>
@@ -240,7 +233,7 @@ class SetUpOwner extends Component {
                         <div class="col-md-4"><input onChange={this.restaurantCuisineChangeHandler} value={this.state.restaurantCuisine} type="text" class="form-control email" name="restaurantCuisine" readOnly={this.state.readOnly} /></div>
                     </div>
                 </div>
-                <div class="row" style={{paddingTop:'10px'}}>
+                <div class="row" style={{ paddingTop: '10px' }}>
                     <div class="row">
                         <div class="col-md-6"> Restaurant Address </div>
                     </div>
@@ -248,7 +241,7 @@ class SetUpOwner extends Component {
                         <div class="col-md-4"><input onChange={this.restaurantAddressChangeHandler} value={this.state.restaurantAddress} type="text" class="form-control email" name="restaurantAddress" readOnly={this.state.readOnly} /></div>
                     </div>
                 </div>
-                <div class="row" style={{paddingTop:'10px'}}>
+                <div class="row" style={{ paddingTop: '10px' }}>
                     <div class="row">
                         <div class="col-md-6"> Restaurant Zip </div>
                     </div>
@@ -256,7 +249,7 @@ class SetUpOwner extends Component {
                         <div class="col-md-4"><input onChange={this.restaurantZipCodeChangeHandler} value={this.state.restaurantZipCode} type="number" class="form-control email" name="restaurantZipCode" readOnly={this.state.readOnly} /></div>
                     </div>
                 </div>
-                <div class="row" style={{paddingTop:'50px'}}><button type="button" onClick={this.updateHandler} class="btn btn-success btn-lg col-md-6">Set Up</button></div>
+                <div class="row" style={{ paddingTop: '50px' }}><button type="button" onClick={this.updateHandler} class="btn btn-success btn-lg col-md-6">Set Up</button></div>
             </div>
 
 
@@ -266,21 +259,21 @@ class SetUpOwner extends Component {
             <div>
                 {redirectVar}
                 <div class="row" >
-                <div class="col-md-2"></div>
-                    <div class="col-md-8" style={{ background: 'white', textAlign: 'center',paddingBottom:'20px' }}>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8" style={{ background: 'white', textAlign: 'center', paddingBottom: '20px' }}>
                         <h2>Congrats on getting started with GrubHub</h2>
                         <h4>In just a few steps you will be on your way of growing your business</h4>
                     </div>
                 </div>
                 <div class="row">
-                <div class="col-md-2"></div>
-                    <div class="col-md-8" style={{marginTop:'50px',background:'white',paddingBottom:'50px',paddingLeft:'150px'}}>{createDisplay}</div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8" style={{ marginTop: '50px', background: 'white', paddingBottom: '50px', paddingLeft: '150px' }}>{createDisplay}</div>
                 </div>
-                <div class="row"> { messageDisplay }</div>
+                <div class="row"> {messageDisplay}</div>
 
             </div>
         )
     }
 }
 
-export default SetUpOwner;
+export default withApollo(SetUpOwner);

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import '../../../App.css';
-import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
-import { address } from '../../../constant';
+import { signupOwnerMutation } from '../../mutation/mutations';
+import { withApollo } from 'react-apollo';
 
 
 class SignUpOwner extends Component {
@@ -69,28 +69,26 @@ class SignUpOwner extends Component {
     }
     signupHandler = (e) => {
         e.preventDefault();
-        axios.defaults.withCredentials = true;
-
-        var data = { firstName: this.state.firstName, lastName: this.state.lastName, phone: this.state.phone, email: this.state.email, restaurant: this.state.restaurant, zipcode: this.state.zipCode, password: this.state.password }
-        axios.post(address+"/restaurant/signup", data)
-            .then((response) => {
-                if (response.status === 200) {
-                    sessionStorage.setItem("OwnerFirstName",this.state.firstName)
-                    sessionStorage.setItem("username",this.state.email);
-     
-                    this.setState({
-                        authFlag: true,
-                        errorMessage: []
-                    })
-                } else if (response.status === 201) {
-                    this.setState({
-                        errorMessage: response.data,
-                        authFlag: false
-                    })
-                }
-
+        var data = { firstName: this.state.firstName, lastName: this.state.lastName, phone: this.state.phone, email: this.state.email, restaurant: this.state.restaurant, zipcode: parseInt (this.state.zipCode), password: this.state.password }
+        this.props.client.mutate({
+            mutation:signupOwnerMutation,
+            variables:data
+        }).then((response)=>{
+           if(response.data.signupOwner.status === 200){
+            cookie.save('cookie', 'admin', { path: '/' });   
+            sessionStorage.setItem("OwnerFirstName",this.state.firstName)
+            sessionStorage.setItem("username",this.state.email);
+            this.setState({
+                authFlag: true,
+                errorMessage: []
             })
-
+           }else{
+            this.setState({
+                errorMessage: [response.data.signupOwner.msg],
+                authFlag: false
+            })
+           }
+        })
     }
     render() {
 
@@ -156,4 +154,4 @@ class SignUpOwner extends Component {
     }
 }
 //export Home Component
-export default SignUpOwner;
+export default withApollo(SignUpOwner);

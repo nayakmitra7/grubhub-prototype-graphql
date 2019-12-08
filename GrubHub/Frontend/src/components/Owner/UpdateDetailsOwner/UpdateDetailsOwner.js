@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import cookie from 'react-cookies';
-import axios from 'axios';
 import { Redirect } from 'react-router';
 import { withApollo } from 'react-apollo';
-import { address } from '../../../constant'
 import '../../../App.css';
 import { getOwner,fetchRestaurantQuery } from '../../queries/queries'
 import { updateOwnerMutation,updateRestaurantMutation } from '../../mutation/mutations';
@@ -64,7 +62,6 @@ class UpdateDetailsOwner extends Component {
                         query:fetchRestaurantQuery,
                         variables:{restaurantId:parseInt(response.data.Owner.restaurantId)}
                     }).then((responses)=>{
-                        console.log(responses)
                         this.setState({
                             restaurantName: responses.data.restaurant.restaurantName,
                             restaurantCuisine: responses.data.restaurant.restaurantCuisine != null ? responses.data.restaurant.restaurantCuisine : "",
@@ -145,7 +142,6 @@ class UpdateDetailsOwner extends Component {
     }
     updateHandler = (e) => {
         e.preventDefault();
-        axios.defaults.withCredentials = true;
         if (this.state.readOnly == false) {
             this.promise1().then(() => {
                 this.props.client.mutate({

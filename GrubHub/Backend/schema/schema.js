@@ -239,6 +239,22 @@ const Mutation = new GraphQLObjectType({
                 return addSection({ data }).then(value => value);
             }
         },
+        signupOwner: {
+            type: responseType,
+            args: {
+                firstName: { type: new GraphQLNonNull(GraphQLString) },
+                lastName: { type: new GraphQLNonNull(GraphQLString) },
+                email: { type: new GraphQLNonNull(GraphQLString) },
+                phone: { type: new GraphQLNonNull(GraphQLString) },
+                password: { type: new GraphQLNonNull(GraphQLString) },
+                zipcode: { type: new GraphQLNonNull(GraphQLInt) },
+                restaurant: { type: new GraphQLNonNull(GraphQLString) }
+            },
+            resolve: (rootValue, args) => {
+                let data = { firstName: args.firstName, lastName: args.lastName,email:args.email,phone:args.phone,password:args.password,zipcode:args.zipcode,restaurant:args.restaurant };
+                return ownerSignup({ data }).then(value => value);
+            }
+        },       
         addItem: {
             type: responseType,
             args: {
@@ -249,7 +265,6 @@ const Mutation = new GraphQLObjectType({
                 restaurantId: { type: new GraphQLNonNull(GraphQLInt) }
             },
             resolve: (rootValue, args) => {
-                console.log(args)
                 let data = { ItemName: args.ItemName, ItemPrice: args.ItemPrice,ItemDesc:args.ItemDesc,SectionId:args.SectionId,restaurantId:args.restaurantId };
                 return addItem({ data }).then(value => value);
             }
@@ -257,6 +272,50 @@ const Mutation = new GraphQLObjectType({
 
     }
 });
+ownerSignup = ({ data }) => {
+    return new Promise((resolve, reject) => {
+        var query1 = 'INSERT INTO restaurant (restaurantName, restaurantZipCode) VALUES ("' + data.restaurant + '","' + data.zipcode + '");'
+        var query2 = 'select max(restaurantId) as val from restaurant';
+        pool.query(query1, function (err, result, fields) {
+            if (err) {
+                return resolve({ status: 500, msg: 'Something went Wrong' });
+            } else {
+                pool.query(query2, function (err, result, fields) {
+                    if (err) {
+                        return resolve({ status: 500, msg: 'Something went Wrong' });
+                    } else {
+                        var restId = JSON.parse(JSON.stringify(result[0])).val;
+                        bcrypt.hash(data.password, saltRounds, function (err, hash) {
+                            if (!err) {
+                                var query3 = 'INSERT INTO owner (ownerFirstName, ownerLastName,ownerEmail,ownerPhone,restaurantId,ownerPassword) VALUES ("' + data.firstName + '","' + data.lastName + '","' + data.email + '","' + data.phone + '","' + restId + '","' + hash + '");'
+                                pool.query(query3, function (err, result, fields) {
+                                    if (err) {
+                                        var query4 = 'delete from restaurant where restaurantId =' + restId;
+                                        pool.query(query4, function (err, result, fields) {
+                                            return resolve({ status: 500, msg: 'Something went Wrong' });
+
+                                        })
+
+                                        return resolve({ status: 500, msg: 'Something went Wrong' });
+                                    } else {
+
+                                        return  resolve({ status: 200, msg: 'Successfully updated' });
+                                    }
+                                })
+                            } else {
+                                return resolve({ status: 500, msg: 'Something went Wrong' });
+                            }
+                        })
+
+
+                    }
+                })
+            }
+
+        })
+
+    });
+};
 addItem = ({ data }) => {
     return new Promise((resolve, reject) => {
         let sql = 'Insert into menuItems (ItemName,ItemPrice,ItemDesc,SectionId,restaurantId) values ("' + data.ItemName + '","' + data.ItemPrice + '","' + data.ItemDesc + '","' + data.SectionId + '","' + data.restaurantId + '")'
@@ -279,7 +338,6 @@ restaurantUpdate = ({ data }) => {
     return new Promise((resolve, reject) => {
         let sql = 'update restaurant set restaurantName="' + data.restaurantName + '",restaurantCuisine="' + data.restaurantCuisine + '",restaurantAddress ="' + data.restaurantAddress + '",restaurantZipCode="' + data.restaurantZipCode + '"  where restaurantId="' + data.restaurantId + '"'
         pool.query(sql, (err, results) => {
-            console.log(err)
             if (err) resolve({ status: 500, msg: 'Something went Wrong' });
             resolve({ status: 200, msg: 'Successfully updated' });
         });

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import '../../../App.css';
-import axios from 'axios';
 import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
 import { address } from '../../../constant'
@@ -178,7 +177,6 @@ class MenuOwner extends Component {
     }
 
     addSectionHandler = (e) => {
-        axios.defaults.withCredentials = true;
         this.props.client.mutate({
             mutation: addSectionMutation,
             variables: {
